@@ -1,0 +1,645 @@
+---
+title: "Introduction to R: section 6"
+tutorial:
+  id: "au.edu.unsw.cbdrh.intro_to_R.section6"
+  version: 0.1
+output: 
+  learnr::tutorial:
+    progressive: false
+    allow_skip: true
+    css: css/intro.css
+runtime: shiny_prerendered
+description: "Section 6: Control structures"
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+tutorial_options(exercise.completion = FALSE, exercise.diagnostics = FALSE)
+```
+
+![](images/UNSW_2017_Big Data_landscape.jpg){width="75%"}
+
+## Overview
+
+This tutorial is broken into six sections.
+
+This final section deals with control structures and control-like functions in R.
+
+ * if / if ... else
+ * ifelse()
+ * switch()
+ * while
+ * for
+ * repeat
+
+<span class="copyright">© Copyright 2018 UNSW Sydney. All rights reserved except where otherwise stated.</span>
+
+## Control structures in R
+
+R has control structures very similar to those in other common C-like programming languages such as Python, C, C++, Java and JavaScript.
+
+Control structures are used to control the execution of code in the program
+in accordance with decisions which can often be made only at runtime (that is, when running the programme code).
+
+For example, we might need to, based on some condition, perform one of multiple options, or to repeat some section of code.
+A condition or _predicate_ is a `TRUE`/`FALSE` value, such as
+
+  * whether a bank account balance is below zero
+  * whether a temperature has reached a certain threshold
+  * whether there are a certain proportion of valid observation in a sample
+  * whether there is network connectivity
+  
+anything that can be reduced to a `TRUE`/`FALSE` YES/NO type answer.
+
+## `if` and `if ... else` statements
+
+`if` statements are used to perform one of one or two options based on the value of a condition.
+
+The syntax in R is similar to the syntax used in languages such as Java, JavaScript, C and C++.
+
+An `if` conditional structure in R contains at least one `if` clause, followed by zero or more `else` clauses.
+
+Note that there is no `elif` or `elsif` statement in R, as there is in some other languages.
+Instead, `else` and `if` are just used together to achieve the same effect.
+
+The `if` conditional statement in R looks like this:
+
+```
+if (condition) {
+  # some code
+}
+```
+
+and executes as follows:
+
+  * evaluate `condition`
+  * if `condition` is `TRUE` then execute the body of the `if` here shown as `# some code`
+    * the body may be zero, one or more lines of code including other conditions and calls to functions
+  * if `condition` is `FALSE` then do nothing: skip the body of the `if` statement 
+
+```{r conditionals-example-1, exercise=TRUE}
+x <- 5
+
+if (x > 0) {
+   print("x is a positive number")
+}
+```
+
+The `if ... else` conditional statement looks like this:
+
+```
+if (condition) {
+  # do this if condition is true
+} else {
+  # do this if condition is false
+}
+```
+
+and executes as follows:
+
+  * evaluate `condition`
+  * if `condition` is `TRUE` then execute the body of the `if` here shown as `# do this if condition is true`
+    * the body may be zero, one or more lines of code including other conditions and calls to functions
+    * the second part of the `if`, the `else` clause shown above as `# do this if condition is false` is not executed
+  * if `condition` is `FALSE` then execute the body of the `if` shown above as `# do this if condition is false`
+    * the body may be zero, one or more lines of code including other conditions and calls to functions
+    * the first part of the `if`, the clause here shown as `# do this if condition is true` is not executed
+
+```{r conditionals-example-2, exercise=TRUE, exercise.setup="conditionals-examples-set-up"}
+x <- 5
+
+if (x <= 0) {
+   print("x is zero or a negative number")
+} else {
+   print("x is a positive number")
+}
+```
+
+Sometimes it is necessary to chain multiple decisions one after the other.
+For convenience instead of nesting `else` clauses ever deeper and deeper
+chained `if ... else if ... else if ... else` statements look like this:
+
+```
+if (condition_1) {
+  # action 1
+} else if (condition_2) {
+  # action 2
+} else if (condition_3) {
+  # action 3
+} ... and so on ... {
+} else {
+  # fall-through action
+}
+```
+
+and executes as follows:
+
+  * evaluate `condition1`
+  * if `condition1` is `TRUE` then execute the following body shown above as `# action 1`
+    * the body may be zero, one or more lines of code including other conditions and calls to functions
+    * none of the other bodies are executed
+    * no more evaluation is done of the other conditions
+  * if `condition1` is `FALSE` then `condition_2` is executed
+  * if `condition2` is `TRUE` then execute the following body code shown above as `# action 2`
+    * the body may be zero, one or more lines of code including other conditions and calls to functions
+    * none of the other bodies are executed
+    * no more evaluation is done of the other conditions
+  * and so on for `condition_3` and `# action 3` and 4 and 5 and however many there are
+  * finally, only if all the previous conditions are `FALSE` execute the `# fall-through action` block of code
+    * the block may be zero, one or more lines of code including other conditions and calls to functions
+    * none of the other bodies are executed
+    
+```{r conditionals-example-3, exercise=TRUE, exercise.setup="conditionals-examples-set-up"}
+x <- 5
+
+if (x > 0) {
+   print("x is a positive number")
+} else if (x == 0) {
+   print("x is zero")
+} else if (x < 0) {
+   print("x is a negative number")
+} else {
+    print(paste("x is something else:", x))
+}
+```
+    
+It's important to note that only one of the blocks is ever executed.
+If there is no catch all final `else` clause it's possible for no blocks to be executed.
+
+So, for example in the following code
+
+```
+x <- 5
+
+if (x < 10) {
+  print("Hello")
+} else if (x < 15) {
+  print("Goodbye")
+}
+```
+
+even though both conditions would evaluate to `TRUE`,
+because execution stops after the first condition which evaluates to `TRUE`
+the second is never evaluated.
+The output from this block of code would be `Hello`.
+Try it
+
+```{r conditionals-at-most-one-block, exercise=TRUE}
+x <- 5
+
+if (x < 10) {
+  print("Hello")
+} else if (x < 15) {
+  print("Goodbye")
+}
+```
+
+Let's test all of this with several different values of `x` by defining a function (we don't want to repeat code).
+
+```
+test_x <- function(x) {
+  if (x > 0) {
+     print("x is a positive number")
+  } else if (x == 0) {
+     print("x is zero")
+  } else if (x < 0) {
+     print("x is a negative number")
+  } else {
+      print(paste("x is something else:", x))
+  }
+}
+```
+
+```{r conditionals-example-4-setup}
+test_x <- function(x) {
+  if (x > 0) {
+     print("x is a positive number")
+  } else if (x == 0) {
+     print("x is zero")
+  } else if (x < 0) {
+     print("x is a negative number")
+  } else {
+      print(paste("x is something else:", x))
+  }
+}
+```
+
+```{r conditionals-example-4, exercise=TRUE, exercise.setup="conditionals-example-4-setup"}
+test_x(3)
+```
+
+```{r conditionals-example-5, exercise=TRUE, exercise.setup="conditionals-example-4-setup"}
+test_x(0)
+```
+
+```{r conditionals-example-5a, exercise=TRUE, exercise.setup="conditionals-example-4-setup"}
+test_x(-20)
+```
+
+```{r conditionals-example-6, exercise=TRUE, exercise.setup="conditionals-example-4-setup"}
+test_x(NA) # set x to missing
+```
+
+Notice that the last example gives an error due to `x` containing the special value `NA`.
+This is because comparing things to `NA` gives `NA` not a boolean `TRUE`/`FALSE` value.
+
+Let's rewrite our conditional statement to deal with it and some other special non-numeric values.
+Note the use of the `|` symbol to denote 'logical OR' in the first conditional statement:
+
+```{r conditionals-example-7, exercise=TRUE}
+x <- NA
+
+if (is.na(x) | is.nan(x)) {
+    print(paste("x is something else:", x))
+} else if (x > 0) {
+   print("x is a positive number")
+} else if (x == 0) {
+   print("x is zero")
+} else if (x < 0) {
+   print("x is a negative number")
+}
+```
+
+Note that curly braces are not needed if there is only one statement in each of the conditional blocks.
+Thus, this is equivalent to the code above **but is highly discouraged because it makes code less readable**:
+
+```{r conditionals-example-8, exercise=TRUE}
+x <- -3
+
+if (x > 0) print("x is a positive number") else print("x is zero or a negative number")
+```
+
+Best practice is to **always** include `{ }` around code blocks to make things more readable and avoid errors.
+
+`if` only tests the first value in a vector,
+but it prints a helpful warning message if there is more than one value in a vector involved in such a comparison:
+
+```{r conditionals-example-9, exercise=TRUE}
+x <- c(2, -3, 67, 0)
+
+if (x > 0) {
+  print("x is a positive number")
+} else {
+  print("x is zero or a negative number")
+}
+```
+
+## `ifelse()`
+
+The `condition` in an `if` statement only checks the first value of a vector.
+There is a vectorised function, `ifelse(test, yes, no)` of three arguments which can be use when more than one value is under consideration.
+`ifelse` returns a value with the same shape as `test`
+which is filled with elements selected from either `yes` or `no`
+depending on whether the corresponding element of `test` is `TRUE` or `FALSE`.
+The vectors `yes` and `no` are recycled if they are too short.
+
+```{r conditionals-example-10, exercise=TRUE}
+x <- c(2, -3, 67, 0)
+
+ifelse(x > 0, "x is a positive number", "x is zero or a negative number")
+```
+
+## Activity: `if` and `ifelse()`
+
+Write some R code to:
+
+  * create an integer vector containing a single value
+  * test whether that integer is odd or even and print out 'odd' or 'even' accordingly.
+    * hint: use the modulus operator `%%` which gives the remainder after integer division, _e.g._ `10 %% 3` evaluates to `1`.
+
+```{r conditionals-exercise-1, exercise=TRUE, exercise.lines = 3}
+
+
+```
+
+```{r conditionals-exercise-1-solution}
+a <- 45L
+
+if (a %% 2 == 0) print("even") else print("odd")
+```
+
+Write some R code to:
+
+  * create an integer vector containing multiple odd and even values
+  * return a vector which contains ${x_i}^2$ if $x_i$ is odd and $\frac{x_i}{2}$ if $x_i$ is even.
+
+```{r conditionals-exercise-2, exercise=TRUE, exercise.lines = 3}
+
+
+```
+
+```{r conditionals-exercise-2-solution}
+a <- c(1L, 2L, 3L, 4L, 5L)
+
+ifelse(a %% 2 == 1, a ^ 2, a / 2)
+```
+
+## `switch()`
+
+R provides a `switch()` function, which is similar to `switch`...`case` constructs in other programming languages.
+
+The `switch()` function look like this:
+
+```
+switch(expression, ...)
+```
+
+and executes as follows:
+
+  * evaluate `expression`
+  * if `expression` does not evaluate to a character string it is coerced to integer
+    * if the integer is between 1 and the `nargs-1` (where `nargs`) is the number of arguments supplied to `switch()` the corresponding element of `...` is evaluated and the result returned
+  * if `expression` evaluated to a character string then the names of the elements in `...` are checked
+    * if there is an argument with a matching name it is evaluated and returned
+    * if there is a matching but the return value is missing the next non-missing element is evaluated and returned
+    * if there is no match and there is an _unnamed_ element of `...` it is evaluated and returned (it is an error to have more than one)
+  * if there is no match `NULL` is returned
+  
+Consider:
+
+```{r loops-example-5, exercise=TRUE}
+# the second item in the list of arguments is returned
+switch(2, "red", "green", "blue")
+```
+
+```{r loops-example-6, exercise=TRUE}
+# the first item in the list of arguments is returned
+switch(1, "red", "green", "blue")
+```
+
+And with named arguments:
+
+```{r loops-example-7, exercise=TRUE}
+switch("shape", "color" = "red", "shape" = "square", "length" = 5)
+
+switch("length", "color" = "red", "shape" = "square", "length" = 5)
+
+switch("b", "a" = "red", "b" = , "c" = 5)
+
+switch("missing", "a" = "red", "b" = , "c" = 5, "hello")
+```
+
+
+## `while` loops
+
+Loops are used to perform repetition in a program.
+
+The `while` conditional statement in R looks like this:
+
+```
+while (condition) {
+  # some code
+}
+```
+
+and executes as follows:
+
+  * evaluate `condition`
+  * if `condition` is `TRUE` then execute the body of the `while` shown above as `# some code`
+    * the body may be zero, one or more lines of code including other conditions and calls to functions
+  * upon reaching the end of the block return to the top to evaluate the condition again
+  * a `while` loop executes _zero or more_ times (the condition may be `FALSE` the first time)
+
+In a `while` loop, the condition is checked each time just before the `while()` block is about to be run,
+to determine if it should be run again.
+We can change things insides the `while` body to control whether the condition evaluates to `TRUE` or `FALSE` next time around.
+It's possible to write loops that loop forever if the condition is not changed correctly.
+It's important to note that `condition` is tested and execution of the loop skipped _only_ at the top of the loop.
+If the `condition` changes partway through the block, execution still continues to the end of the block.
+Execution does not suddenly stop magically partway through.
+
+Consider the following loop.
+
+```
+i <- 1
+while (i <= 10) {
+   print(i)
+   i <- i + 1
+}
+print("done")
+```
+
+In this code, the loop will keep running,
+until the value of the variable `i` is increased to 11, after having printed 10 on the screen.
+
+When `i` reaches the value of 11,
+this the condition `i <= 10` (i is less than or equal to 10) is `FALSE`,
+the test at the top of the loop fails and execution skips the body and passes on to the code after the loop.
+
+Try it.
+
+```{r loops-example-1, exercise=TRUE}
+i <- 1
+while(i <= 10) {
+   print(i)
+   i <- i + 1
+}
+print("done")
+```
+
+`while` loops are good for when we know that we want to keep doing something and we know when we want to stop
+but we may not know exactly how many times we will want to loop.
+
+## `for` loops
+
+R also supports iteration (looping) over each value in a vector or list or other sequence.
+
+The `for` loop in R looks like this:
+
+```
+for (variable in sequence) {
+  # some code
+}
+```
+
+and executes as follows:
+
+  * for each value of sequence in order
+    * set `variable` to $sequence_i$
+    * execute the body of the `for` shown above as `# some code` with `variable` set to that value
+  * a `for` loop executes the same number of times as the length of `sequence`
+
+Consider this R code:
+
+```{r loops-example-2, exercise=TRUE}
+a <- c(1,2,3,4,5)
+
+for (i in a) {
+    print(i^2)
+}
+```
+
+This code will print in turn `1`, `4`, `9`, `16`, `25` and `i` is set to `1`, `2`, `3`, `4`, `5` in turn.
+
+A `for` loop is useful when we want to iterate over the values in a vector or list.
+
+It should should be noted that in R this is less often than in other languages because most functions in R already work with vectors.
+For example, in other languages, to calculated the squares of all numbers in an sequence it is necessary to loop over that sequence.
+In R we can just write `result <- v ^ 2` because `^` works with vectors and already handles multiple values for us.
+This is one of the strengths of R and leads to concise and clear code.
+
+The `for` loop has a very definite place in R, but if you find yourself thinking about looping over all the elements of a vector
+(especially if you're coming from another language where this approach is common like C or Python)
+ask yourself if there is a vectorised function and more R-like approach already available.
+
+## `repeat` loops
+
+Looping (iteration) can also be performed with the `repeat` statement.
+
+A `repeat` loop does not use any condition check or index to control the looping.
+A `repeat` loop will forever, until (or unless) the loop is explicitly terminated
+(which we haven't seen how to do yet but we're about to).
+
+A repeat loop looks like this in R:
+
+```
+repeat {
+}
+```
+
+and is equivalent to
+
+```
+while (TRUE) {
+}
+```
+
+Why might we want to do this?
+
+Sometimes forcing a loop to fit the `while (condition) { ... }` model which has the test at the top leads to
+convoluted and less readable code.
+
+So how to exit a `repeat` loop?
+
+## break
+
+The `break` statement exits the innermost enclosing loop.
+Control is transferred to the first statement outside the inner-most loop.
+
+To see this in action look at the following code which loops, adding 1 to `x` each time,
+until `x` equals 6, at which point `break` is called which causes control to exit the loop.
+
+```{r loops-example-3, exercise=TRUE}
+x <- 1
+
+repeat {
+    print(x)
+    x = x + 1
+    if (x == 6) {
+      break
+    }
+}
+```
+
+`break` works with any sort of loop in R,
+regardless of whether it is implemented by using `while`, `for` or `repeat`. 
+
+```{r loops-example-break-2, exercise=TRUE}
+for (i in 1:10) {
+  if (i == 5) {
+    break
+  }
+  print(i)
+}
+
+a <- 1
+while (a <= 10) {
+  print(a)
+  a <- a + 1
+  if (a == 5) {
+    break
+  }
+}
+```
+
+Both `break` and `next` (see below) apply only to the innermost of nested loops.
+
+## next
+
+There is also a `next` statement that can be used in loops.
+
+Both `break` and `next` apply only to the innermost of nested loops.
+
+`next` works with any sort of loop in R,
+regardless of whether it is implemented by using `while`, `for` or `repeat`. 
+
+A `next` statement halts the processing of the current iteration and advances to the next iteration.
+When used in a `for` loop it advances to the next value in the sequence.
+When used in a `while` loop it returns to the top of the loop and re-evaluates the `condition` before continuing.
+When used in a `repeat` loop it starts the next iteration by returning to the top of the block of code.
+
+```{r loops-example-next-2, exercise=TRUE}
+for (i in 1:10) {
+  if (i == 5) {
+    next
+  }
+  print(i)
+}
+
+a <- 0
+while (a < 10) {
+  a <- a + 1
+  if (a == 5) {
+    next
+  }
+  print(a)
+}
+```
+
+Notice how the `while` loop here is quite different to the previous examples.
+One must be careful using `next`.
+**If next is called before the loop condition is modified then the loop will never terminate**
+because `condition` will be exactly the same the next time around.
+
+## Activity: loops
+
+Remember our `five_powers` function from section 5?
+
+```
+five_powers <- function(x) {
+    # create a list with 5 empty elements in it
+    result <- list(5)
+    result[[1]] <- x
+    result[[2]] <- x^2
+    result[[3]] <- x^3
+    result[[4]] <- x^4
+    result[[5]] <- x^5
+    return(result)
+}
+```
+
+Rewrite this function using an appropriate loop, and test it by calling the function you write.
+
+```{r loops-exercise-1, exercise=TRUE, exercise.lines=8}
+
+
+```
+
+```{r loops-exercise-1-hint-1}
+five_powers <- function(x) {
+    # create a list with 5 empty elements in it
+    result <- list(5)
+    
+    # replace this comment with your code
+    
+    return(result)
+}
+five_powers(c(1, 2, 3, 4, 5))
+```
+
+```{r loops-exercise-1-hint-2}
+five_powers <- function(x) {
+    # create a list with 5 empty elements in it
+    result <- list(5)
+    for (i in 1:5) {
+      result[[i]] = x^i
+    }
+    return(result)
+}
+five_powers(c(1, 2, 3, 4, 5))
+```
+
+## Summary
+
+That concludes section 6 and the Introduction to R tutorial.

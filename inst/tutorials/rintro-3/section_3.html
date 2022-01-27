@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<meta name="progressive" content="false" />
+<meta name="allow-skip" content="true" />
+
+<title>Introduction to R: section 3</title>
+
+
+<!-- highlightjs -->
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+<!-- taken from https://github.com/rstudio/rmarkdown/blob/67b7f5fc779e4cfdfd0f021d3d7745b6b6e17149/inst/rmd/h/default.html#L296-L362 -->
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("section-TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+<!-- end tabsets -->
+
+
+<link rel="stylesheet" href="css/intro.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+<div class="pageContent band">
+<div class="bandContent page">
+
+<div class="topics">
+
+<p><img src="images/UNSW_2017_Big%20Data_landscape.jpg" style="width:75.0%" /></p>
+<div id="section-overview" class="section level2">
+<h2>Overview</h2>
+<p>This tutorial is broken into six sections.</p>
+<p>In sections 1 and 2 we looked at some of the basics types and operators R provides. We also looked at the vector, a very important basic R data type.</p>
+<p>This section deals with some less common data types used in R:</p>
+<ul>
+<li>Matrices</li>
+<li>Matrix arithmetic</li>
+<li>Lists</li>
+</ul>
+<p>This section may be done after section 4 the first time through this tutorial if desired.</p>
+<p><span class="copyright">© Copyright 2018 UNSW Sydney. All rights reserved except where otherwise stated.</span></p>
+</div>
+<div id="section-matrices-in-r" class="section level2">
+<h2>Matrices in R</h2>
+<p>Matrices (matrixes) in R are similar to vectors in that they can contain elements of only one data type. Unlike vectors they have two dimensions, not just one.</p>
+<p>In fact, a matrix in R is actually just a vector onto which an additional dimension has been imposed. This can be seen from the way matrices are created using the <code>matrix()</code> function.</p>
+<p>Arrays in R are similar to matrices, but they have more than two dimensions.</p>
+<p>The distinction is made between matrices and arrays because two-dimensional matrices are the foundation of linear algebra, which is extensively used in statistics and statistical computation. R provides a rich variety of functions that efficiently implement linear algebra operations, that only work on objects of the ‘matrix’ class.</p>
+<p>To create a matrix in R, you can use the <code>matrix()</code> function thus:</p>
+<div class="tutorial-exercise" data-label="matrices-exercise-1" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>a &lt;- matrix(c(2, 4, 3, 1, 5, 7), # the data elements 
+            nrow=2,              # number of rows 
+            ncol=3)              # number of columns 
+
+a
+class(a)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<p>Notice that the matrix is filled column-wise: the first two values are used to fill the first column, the next two values are used to fill the second column, and so on.</p>
+<p>Matrices can be created row-wise by using the <code>byrow</code> argument to the <code>matrix()</code> function:</p>
+<div class="tutorial-exercise" data-label="matrices-exercise-2" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>b &lt;- matrix(c(2, 4, 3, 1, 5, 7), # the data elements 
+            nrow=2,              # number of rows 
+            ncol=3,              # number of columns 
+            byrow=TRUE)          # fill the matrix row-wise
+
+b</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<p>Note that each row and column in a matrix (and higher dimensions in an array) can be given a name. If a source data vector is provided it is not necessary to specify both the number of rows and the number of columns since one can be inferred from the other (because the length of the source vector gives the total number of cells in the matrix or array):</p>
+<div class="tutorial-exercise" data-label="matrices-exercise-3" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>c &lt;- matrix(c(2, 4, 3, 1, 5, 7), 
+            nrow = 2,
+            dimnames = list(
+                c(&quot;row one&quot;, &quot;row two&quot;),
+                c(&quot;col one&quot;, &quot;col two&quot;, &quot;col three&quot;)
+            ))
+
+c</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="matrices-exercises-set-up-d" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>c &lt;- matrix(c(2, 4, 3, 1, 5, 7), 
+            nrow = 2,
+            dimnames = list(
+                c(&quot;row one&quot;, &quot;row two&quot;),
+                c(&quot;col one&quot;, &quot;col two&quot;, &quot;col three&quot;)
+            ))</code></pre>
+</div>
+<p>You can also use the <code>rownames()</code> and <code>colnames()</code> functions to get or set the row and column names of a matrix object:</p>
+<div class="tutorial-exercise" data-label="matrices-exercise-4" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>rownames(c)
+colnames(c)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercises-set-up-d","exercise.checker":"NULL"}</script>
+</div>
+<p>The <code>dim()</code> function will return the dimensions of the matrix. It can also be used to set, or impose matrix dimensions on a vector (by specifying the number of rows then columns):</p>
+<div class="tutorial-exercise" data-label="matrices-exercise-5" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code># create b as a vector
+b &lt;- c(2, 4, 3, 1, 5, 7)
+dim(b)
+# turn the vector into a matrix
+dim(b) &lt;- c(2, 3)
+dim(b)
+
+b
+
+class(b)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<p>Note that the <code>dim()</code> function can also be used to reshape an existing matrix. When using <code>dim()</code> to do this any row and column names are lost:</p>
+<div class="tutorial-exercise-support" data-label="matrices-exercises-set-up-a" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>a &lt;- matrix(c(2, 4, 3, 1, 5, 7), # the data elements 
+            nrow=2,              # number of rows 
+            ncol=3)              # number of columns </code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="matrices-exercises-set-up-c" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>c &lt;- matrix(c(2, 4, 3, 1, 5, 7), 
+            nrow = 2,
+            dimnames = list(
+                c(&quot;row one&quot;, &quot;row two&quot;),
+                c(&quot;col one&quot;, &quot;col two&quot;, &quot;col three&quot;)
+            ))</code></pre>
+</div>
+<div class="tutorial-exercise" data-label="matrices-exercise-6" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>dim(a)
+a
+
+dim(a) &lt;- c(3,2)
+a</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercises-set-up-a","exercise.checker":"NULL"}</script>
+</div>
+<p>The <code>length()</code> function, which returns the number of elements in a vector, also works with matrices and arrays, where it returns the product of all the dimensions, that is, the total number of data elements (cells) in the matrix or array:</p>
+<div class="tutorial-exercise" data-label="matrices-exercise-7" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>a
+length(a)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercises-set-up-a","exercise.checker":"NULL"}</script>
+</div>
+<p>Elements of a matrix can be accessed, and their values set, using <code>[]</code> square bracket operators, just like vectors, but with two dimensions of indices, separated by a comma.</p>
+<p>Rows come first, then columns:</p>
+<div class="tutorial-exercise" data-label="matrices-exercise-8a" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>a
+a[1, 1]
+a[2, 3]</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercises-set-up-a","exercise.checker":"NULL"}</script>
+</div>
+<p>If you want, say, all the rows in a matrix but only some columns, just leave the rows parameter to the <code>[ ]</code> operator blank:</p>
+<div class="tutorial-exercise" data-label="matrices-exercise-9" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code># matrix a looks like this
+a
+
+# all rows but only column 2 of matrix a
+a[,2]
+
+# all columns but only row 2 of matrix a
+a[2,]</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercises-set-up-a","exercise.checker":"NULL"}</script>
+</div>
+<p>Notice that the result is no longer a matrix, it’s a vector, because there is only one column or one row returned.</p>
+<div class="tutorial-exercise" data-label="matrices-exercise-10" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>class(a[,2])
+class(a[2,])</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercises-set-up-a","exercise.checker":"NULL"}</script>
+</div>
+<p>The comma <code>,</code> is important when addressing a matrix. Because a matrix is a vector under the hood not using a <code>,</code> means selecting the nth element of the matrix running down the columns in turn.</p>
+<div class="tutorial-exercise" data-label="matrices-exercise-10a" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>a
+a[1]
+a[2]
+a[3]</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercises-set-up-a","exercise.checker":"NULL"}</script>
+</div>
+<p>Let’s reshape matrix <code>a</code> and try subsetting again, but requesting two columns:</p>
+<div class="tutorial-exercise" data-label="matrices-exercise-11" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>dim(a) &lt;- c(2,3)
+a
+
+# all rows but only columns 1 and 3 of matrix a
+a[,c(1,3)]
+
+# notice that the result is now still a matrix, because there is more than one column and more than one row
+class(a[,c(1,3)])</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercises-set-up-a","exercise.checker":"NULL"}</script>
+</div>
+<p>Negative indices can also be used with matrices and arrays. This has the same effect as when subsetting a vector, the given rows/columns are excluded. It also has the same restriction: positive and negative indices may not be mixed.</p>
+<div class="tutorial-exercise" data-label="matrices-exercise-12" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>a[,-2]</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercises-set-up-a","exercise.checker":"NULL"}</script>
+</div>
+<p>Subsetting matrices and arrays by element name also works as expected:</p>
+<div class="tutorial-exercise" data-label="matrices-exercise-13" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>c
+
+c[&quot;row two&quot;, &quot;col three&quot;]</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercises-set-up-c","exercise.checker":"NULL"}</script>
+</div>
+<p>Assignment to elements in a matrix or array is analogous to assignment to elements of a vector:</p>
+<div class="tutorial-exercise" data-label="matrices-exercise-14" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>c[2, 2] &lt;- NA
+
+c</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercises-set-up-c","exercise.checker":"NULL"}</script>
+</div>
+<p>Matrices can be combined, row-wise or column-wise, using the <code>rbind()</code> and <code>cbind()</code> functions:</p>
+<pre class="r"><code>a &lt;- matrix(c(2, 4, 3, 1, 5, 7), # the data elements 
+            nrow=2,              # number of rows 
+            ncol=3)              # number of columns 
+
+b &lt;- matrix(c(12, 14, 13, 11, 15, 17),  # the data elements 
+            nrow=2,                     # number of rows 
+            ncol=3)                     # number of columns 
+a</code></pre>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    2    3    5
+## [2,]    4    1    7</code></pre>
+<pre class="r"><code>b</code></pre>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]   12   13   15
+## [2,]   14   11   17</code></pre>
+<div class="tutorial-exercise-support" data-label="matrices-exercise-binding-set-up" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>a &lt;- matrix(c(2, 4, 3, 1, 5, 7), # the data elements 
+            nrow=2,              # number of rows 
+            ncol=3)              # number of columns 
+b &lt;- matrix(c(12, 14, 13, 11, 15, 17),   # the data elements 
+            nrow=2,              # number of rows 
+            ncol=3)              # number of columns </code></pre>
+</div>
+<div class="tutorial-exercise" data-label="matrices-exercise-17" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code># join rows together
+rbind(a, b)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercise-binding-set-up","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise" data-label="matrices-exercise-18" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code># join columns together
+cbind(a, b)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercise-binding-set-up","exercise.checker":"NULL"}</script>
+</div>
+</div>
+<div id="section-visualising-matrices" class="section level2">
+<h2>Visualising matrices</h2>
+<p>Matrices can readily be visualised in R using the <code>image()</code> function. First, let’s create a matrix consisting of just ones and zeros, drawing the shape of a T with the zeros:</p>
+<div class="tutorial-exercise-support" data-label="visualising-matrices-set-up" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>mat &lt;- matrix(c(0,0,0,1,0,1,1,0,1), nrow=3, byrow=TRUE)</code></pre>
+</div>
+<pre class="r"><code>mat &lt;- matrix(c(0,0,0,1,0,1,1,0,1), nrow=3, byrow=TRUE)
+
+mat</code></pre>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    0    0    0
+## [2,]    1    0    1
+## [3,]    1    0    1</code></pre>
+<p>Now let’s visualise that using <code>image()</code>. The <code>image()</code> function chooses colours for us automatically (although the colours can be overridden, of course).</p>
+<div class="tutorial-exercise" data-label="visualising-matrices-exercise-2" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>image(mat)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"visualising-matrices-set-up","exercise.checker":"NULL"}</script>
+</div>
+<p>Well, it draws a T, but rotated through 90 degrees. For some obscure reason, the <code>image()</code> function draws matrices in a rotated fashion. Never mind, we can just define a function to rotate our matrix before visualising it (we can define our own functions in R as we will see later in section 5):</p>
+<div class="tutorial-exercise" data-label="visualising-matrices-exercise-3" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>rotate &lt;- function(x) t(apply(x, 2, rev))
+    
+image(rotate(mat))</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"visualising-matrices-set-up","exercise.checker":"NULL"}</script>
+</div>
+<p>Here we see a visualisation of a matrix called <code>volcano</code> (this matrix is built-in to R as an example), the cells of which contain the heights of a volcano at grid references:</p>
+<pre class="r"><code>class(volcano)</code></pre>
+<pre><code>## [1] &quot;matrix&quot; &quot;array&quot;</code></pre>
+<pre class="r"><code>head(volcano)</code></pre>
+<pre><code>##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14]
+## [1,]  100  100  101  101  101  101  101  100  100   100   101   101   102   102
+## [2,]  101  101  102  102  102  102  102  101  101   101   102   102   103   103
+## [3,]  102  102  103  103  103  103  103  102  102   102   103   103   104   104
+## [4,]  103  103  104  104  104  104  104  103  103   103   103   104   104   104
+## [5,]  104  104  105  105  105  105  105  104  104   103   104   104   105   105
+## [6,]  105  105  105  106  106  106  106  105  105   104   104   105   105   106
+##      [,15] [,16] [,17] [,18] [,19] [,20] [,21] [,22] [,23] [,24] [,25] [,26]
+## [1,]   102   102   103   104   103   102   101   101   102   103   104   104
+## [2,]   103   103   104   105   104   103   102   102   103   105   106   106
+## [3,]   104   104   105   106   105   104   104   105   106   107   108   110
+## [4,]   105   105   106   107   106   106   106   107   108   110   111   114
+## [5,]   105   106   107   108   108   108   109   110   112   114   115   118
+## [6,]   106   107   109   110   110   112   113   115   116   118   119   121
+##      [,27] [,28] [,29] [,30] [,31] [,32] [,33] [,34] [,35] [,36] [,37] [,38]
+## [1,]   105   107   107   107   108   108   110   110   110   110   110   110
+## [2,]   107   109   110   110   110   110   111   112   113   114   116   115
+## [3,]   111   113   114   115   114   115   116   118   119   119   121   121
+## [4,]   117   118   117   119   120   121   122   124   125   126   127   127
+## [5,]   121   122   121   123   128   131   129   130   131   131   132   132
+## [6,]   124   126   126   129   134   137   137   136   136   135   136   136
+##      [,39] [,40] [,41] [,42] [,43] [,44] [,45] [,46] [,47] [,48] [,49] [,50]
+## [1,]   110   110   108   108   108   107   107   108   108   108   108   108
+## [2,]   114   112   110   110   110   109   108   109   109   109   109   108
+## [3,]   120   118   116   114   112   111   110   110   110   110   109   109
+## [4,]   126   124   122   120   117   116   113   111   110   110   110   109
+## [5,]   131   130   128   126   122   119   115   114   112   110   110   110
+## [6,]   136   135   133   129   126   122   118   116   115   113   111   110
+##      [,51] [,52] [,53] [,54] [,55] [,56] [,57] [,58] [,59] [,60] [,61]
+## [1,]   107   107   107   107   106   106   105   105   104   104   103
+## [2,]   108   108   108   107   107   106   106   105   105   104   104
+## [3,]   109   109   108   108   107   107   106   106   105   105   104
+## [4,]   109   109   109   108   108   107   107   106   106   105   105
+## [5,]   110   110   109   109   108   107   107   107   106   106   105
+## [6,]   110   110   110   109   108   108   108   107   107   106   106</code></pre>
+<p>Note that the <code>head()</code> functions shows us the first 6 rows of an object (<code>tail()</code> shows the last 6 rows). Because there are more columns than will fit across the screen, the output ends up wrapped onto multiple lines. Helpfully, R repeats the row and column indices each time the output is wrapped.</p>
+<p>Let’s visualise it:</p>
+<div class="tutorial-exercise" data-label="visualising-matrices-exercise-5" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>image(volcano)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<p>…or to put that in perspective, using the <code>persp()</code> function:</p>
+<div class="tutorial-exercise" data-label="visualising-matrices-exercise-6" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>persp(volcano)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+</div>
+<div id="section-matrix-arithmetic" class="section level2">
+<h2>Matrix arithmetic</h2>
+<p>The standard arithmetic operators, <code>+</code>, <code>-</code>, <code>*</code> and <code>/</code>, all work element-wise on matrices, just as they do with vectors.</p>
+<p>The operators <code>+</code> and <code>-</code> are probably what are wanted when adding and subtracting matrices because they add and subtract the elements of the matrices element-wise.</p>
+<p>Note that when performing this type of arithmetic on two matrices, they must be ‘conformable’, <em>i.e.</em> the matrices must each be exactly the same size and shape, or you won’t get the results you expect.</p>
+<p>But <strong><code>*</code> is not matrix multiplication</strong> but element-wise multiplication of individual entries and that’s not what is conventionally meant when writing an expression like <code>A * B</code> when <code>A</code> and <code>B</code> are matrices. This can be a source of error and confusion.</p>
+<p>Recall that we have defined two matrices, <code>a</code> and <code>b</code>:</p>
+<pre class="r"><code>a</code></pre>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    2    3    5
+## [2,]    4    1    7</code></pre>
+<pre class="r"><code>b</code></pre>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]   12   13   15
+## [2,]   14   11   17</code></pre>
+<p>Now write R code to print the sum of <code>a</code> and <code>b</code>:</p>
+<div class="tutorial-exercise" data-label="matrix-arithmetic-exercise-2" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercise-binding-set-up","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="matrix-arithmetic-exercise-2-hint" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>a + b</code></pre>
+</div>
+<p>Now write R code to print the difference of <code>a</code> and <code>b</code> (<code>a</code> minus <code>b</code>):</p>
+<div class="tutorial-exercise" data-label="matrix-arithmetic-exercise-3" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercise-binding-set-up","exercise.checker":"NULL"}</script>
+</div>
+<div id="section-scalar-multiplication" class="section level3">
+<h3>Scalar multiplication</h3>
+<p>Note that because these operations are element-wise the basic multiplication (<code>*</code>), division (<code>/</code>) and exponentiation (<code>^</code> and <code>**</code>) operators are <strong>not</strong> matrix operations.</p>
+<p>The expression <code>a * b</code> multiplies the elements of <code>a</code> and <code>b</code> element-wise and does <strong>not</strong> perform matrix multiplication.</p>
+<p><span class="math display">\[\left(\matrix{24 &amp; 39 &amp; 75 \\ 56 &amp; 11 &amp; 119}\right) \leftarrow \left(\matrix{2 &amp; 3 &amp; 5 \\ 4 &amp; 1 &amp; 7}\right) * \left(\matrix{12 &amp; 13 &amp; 15 \\ 14 &amp; 11 &amp; 17}\right)\]</span></p>
+<pre class="r"><code>a</code></pre>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    2    3    5
+## [2,]    4    1    7</code></pre>
+<pre class="r"><code>b</code></pre>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]   12   13   15
+## [2,]   14   11   17</code></pre>
+<pre class="r"><code>a * b</code></pre>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]   24   39   75
+## [2,]   56   11  119</code></pre>
+<p>This means that these operations are usually only useful with singleton vectors to effect scalar multiplication and division, &amp;c.</p>
+<p><span class="math display">\[\left(\matrix{6 &amp; 9 &amp; 15 \\ 12 &amp; 3 &amp; 21}\right) \leftarrow \left(\matrix{2 &amp; 3 &amp; 5 \\ 4 &amp; 1 &amp; 7}\right) * 3\]</span></p>
+<p><span class="math display">\[\left(\matrix{0.6666667 &amp; 1.0000000 &amp; 1.666667 \\ 1.3333333 &amp; 0.3333333 &amp; 2.333333}\right) \leftarrow \left(\matrix{2 &amp; 3 &amp; 5 \\ 4 &amp; 1 &amp; 7}\right) / \; 3\]</span></p>
+<p><span class="math display">\[\left(\matrix{4 &amp; 9 &amp; 25 \\ 16 &amp; 1 &amp; 49}\right) \leftarrow \left(\matrix{2 &amp; 3 &amp; 5 \\ 4 &amp; 1 &amp; 7}\right) \wedge 2\]</span></p>
+<p>So vector recycling means that arithmetic involving a matrix and a single vector works as expected.</p>
+<div class="tutorial-exercise" data-label="matrix-arithmetic-exercise-6" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code># remind ourselves what is in matrix a
+a
+
+# multiply a by 2
+a * 3
+
+# divide a by 3
+a / 3
+
+# square each element of a
+a ^ 2</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercise-binding-set-up","exercise.checker":"NULL"}</script>
+</div>
+<p>Recycling does however mean that arithmetic involving a matrix and a vector with more than one element may not work as expected. When the two matrices are not conformable, <em>i.e.</em> not the same size and shape, the result may be very much not what is expected.</p>
+<pre class="r"><code>a * c(1, 2, 3)</code></pre>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    2    9   10
+## [2,]    8    1   21</code></pre>
+<p>Remember that a matrix is stored columm-wise going down the rows so this is what is happening.</p>
+<p><span class="math display">\[\left(\matrix{2 &amp; 9 &amp; 10 \\ 8 &amp; 1 &amp; 21}\right) \leftarrow \left(\matrix{2 \times 1 &amp; 3 \times 3 &amp; 5 \times 2 \\ 4 \times 2 &amp; 1 \times 1 &amp; 7 \times 3}\right) \leftarrow  \left(\matrix{2 &amp; 3 &amp; 5 \\ 4 &amp; 1 &amp; 7}\right) * \left(\matrix{1 &amp; 2 &amp; 3}\right)\]</span></p>
+<p>Which is usually not what was intended.</p>
+</div>
+<div id="section-matrix-multiplication" class="section level3">
+<h3>Matrix multiplication</h3>
+<p>Matrix arithmetic (in the mathematical sense) is performed using the special operators <code>%*%</code> for inner matrix multiplication, and <code>%o%</code> for outer matrix multiplication (or the <code>inner()</code> and <code>outer()</code> functions, which are equivalent).</p>
+<p>For matrix multiplication, the number of rows in the first matrix must be the same as the number of columns in the second matrix.</p>
+<p>Matrix inversion is performed using the <code>solve()</code> function, and matrix transposition using <code>t()</code>:</p>
+<div class="tutorial-exercise" data-label="matrix-arithmetic-exercise-7" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>a
+
+t(a)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrices-exercise-binding-set-up","exercise.checker":"NULL"}</script>
+</div>
+</div>
+<div id="section-logical-operations-on-matrices" class="section level3">
+<h3>Logical operations on matrices</h3>
+<p>Comparisons and logical operations also work with matrices, just as they do with vectors:</p>
+<pre class="r"><code>d &lt;- matrix(9:17, nrow=3)
+d</code></pre>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    9   12   15
+## [2,]   10   13   16
+## [3,]   11   14   17</code></pre>
+<div class="tutorial-exercise-support" data-label="matrix-arithmetic-exercise-8-set-up" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>d &lt;- matrix(9:17, nrow=3)</code></pre>
+</div>
+<div class="tutorial-exercise" data-label="matrix-arithmetic-exercise-9" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code># a logical matrix created with a conditional expression
+d &gt; 12</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrix-arithmetic-exercise-8-set-up","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise" data-label="matrix-arithmetic-exercise-10" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code># replace all values in d which are greater than 12 with NA
+d[d &gt; 12] &lt;- NA
+d</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"matrix-arithmetic-exercise-8-set-up","exercise.checker":"NULL"}</script>
+</div>
+<p>Matrices have their uses but they have the same restriction as vectors in that all elements have to be of the same type. This usually limits their use to purely mathematical applications. For managing and manipulating tabular data we will be looking at another data type, the <em>data frame</em>.</p>
+</div>
+</div>
+<div id="section-lists" class="section level2">
+<h2>Lists</h2>
+<p>So far we have covered vectors, matrices (and mentioned arrays). These data structures are very useful, but they all have one limitation: they can only handle one data type. You cannot, for example, store a mixture of, say, character strings and floating-point (real) numbers in a single vector or matrix.</p>
+<p>The list data structure in R addresses this issue. It permits objects of different data types or classes to be stored in a single list object, and referenced by index position or name.</p>
+<p>Let’s create several vectors, each of a different data type, and a matrix, and add them all to a list object using the <code>list()</code> function:</p>
+<div class="tutorial-exercise-support" data-label="lists-exercises-set-up" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>i &lt;- c(2L, 3L, 5L)
+n &lt;- c(3.56, 2.9736435, 19.8)
+c &lt;- c(&quot;aa&quot;, &quot;bb&quot;, &quot;cc&quot;, &quot;dd&quot;, &quot;ee&quot;) 
+b &lt;- c(TRUE, FALSE, TRUE, FALSE, FALSE) 
+m &lt;- matrix(c(2, 4, 3, 1, 5, 7), nrow=3)
+x &lt;- list(i, n, c, b, m)  </code></pre>
+</div>
+<pre class="r"><code>i &lt;- c(2L, 3L, 5L)
+n &lt;- c(3.56, 2.9736435, 19.8)
+c &lt;- c(&quot;aa&quot;, &quot;bb&quot;, &quot;cc&quot;, &quot;dd&quot;, &quot;ee&quot;) 
+b &lt;- c(TRUE, FALSE, TRUE, FALSE, FALSE) 
+m &lt;- matrix(c(2, 4, 3, 1, 5, 7), nrow=3)
+
+# add them all to a list 
+x &lt;- list(i, n, c, b, m)  
+
+x</code></pre>
+<pre><code>## [[1]]
+## [1] 2 3 5
+## 
+## [[2]]
+## [1]  3.560000  2.973644 19.800000
+## 
+## [[3]]
+## [1] &quot;aa&quot; &quot;bb&quot; &quot;cc&quot; &quot;dd&quot; &quot;ee&quot;
+## 
+## [[4]]
+## [1]  TRUE FALSE  TRUE FALSE FALSE
+## 
+## [[5]]
+##      [,1] [,2]
+## [1,]    2    1
+## [2,]    4    5
+## [3,]    3    7</code></pre>
+<p>Notice that the list object <code>x</code> contains 5 elements, with the index for (position of) each element shown in double square brackets <code>[[ ]]</code>.</p>
+<p>Each element in the list is itself an object, each one of a different data type or class. We can use single square brackets to subset the elements of a list.</p>
+<p>Note that this returns a list:</p>
+<div class="tutorial-exercise" data-label="lists-exercise-2" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>x[3]
+class(x[3])</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"lists-exercises-set-up","exercise.checker":"NULL"}</script>
+</div>
+<p>If we wish to access the objects contained in a list directly, the double square bracket operator is used. The following returns the 3rd element of the list <code>x</code> by itself, rather than returning a list containing the 3rd element as the single square bracket operator would do:</p>
+<div class="tutorial-exercise" data-label="lists-exercise-3" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>x[[3]]
+class(x[[3]])</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"lists-exercises-set-up","exercise.checker":"NULL"}</script>
+</div>
+<p>One can also insert or even modify elements of a list directly (in place) in the list that contains them, using the <code>[[ ]]</code> operator and the <code>[ ]</code> operator. Here we are updating the second value of a vector which is contained in the third element of the list x:</p>
+<div class="tutorial-exercise" data-label="lists-exercise-4" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>x[[3]] # before
+
+x[[3]][2] &lt;- &quot;BB&quot;
+
+x[[3]] # after</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"lists-exercises-set-up","exercise.checker":"NULL"}</script>
+</div>
+<p>Elements in a list may also be named and referenced by name. Let’s reconstruct the list <code>x</code>, this time assigning names to each element. Note the syntax used:</p>
+<div class="tutorial-exercise" data-label="lists-exercise-5" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>x &lt;- list(integers=i, real_numbers=n, character_strings=c, logicals=b, &quot;The Matrix&quot;=m) 
+
+x</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"lists-exercises-set-up","exercise.checker":"NULL"}</script>
+</div>
+<p>Notice that named list elements are printed with a $ prefix, and the $ operator can also be used to access them:</p>
+<div class="tutorial-exercise" data-label="lists-exercise-6" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>x$character_strings
+
+x$logicals
+
+x$&quot;The Matrix&quot;</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"lists-exercise-6-set-up","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="lists-exercise-6-set-up" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>i &lt;- c(2L, 3L, 5L)
+n &lt;- c(3.56, 2.9736435, 19.8)
+c &lt;- c(&quot;aa&quot;, &quot;bb&quot;, &quot;cc&quot;, &quot;dd&quot;, &quot;ee&quot;) 
+b &lt;- c(TRUE, FALSE, TRUE, FALSE, FALSE) 
+m &lt;- matrix(c(2, 4, 3, 1, 5, 7), nrow=3)
+x &lt;- list(integers=i, real_numbers=n, character_strings=c, logicals=b, &quot;The Matrix&quot;=m) </code></pre>
+</div>
+<p>The single square brackets and double square brackets operators also work for named list elements:</p>
+<div class="tutorial-exercise" data-label="lists-exercise-7" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>x[&#39;real_numbers&#39;]
+class(x[&#39;real_numbers&#39;])</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"lists-exercise-6-set-up","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise" data-label="lists-exercise-8" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>x[[&#39;real_numbers&#39;]]
+class(x[[&#39;real_numbers&#39;]])</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"lists-exercise-6-set-up","exercise.checker":"NULL"}</script>
+</div>
+<div id="section-activity-manipulating-lists" class="section level3">
+<h3>Activity: manipulating lists</h3>
+<p>Many R statistical functions return their results in the form of a named list. We will use a built-in data set that comes with R, called <code>mtcars</code>, which contains data about motor cars, and we will use the <code>lm()</code> function to fit a linear regression model to two variables in that data set (we will see how fuel economy in miles per gallon is related to the weight of each car, in pounds: it is an American data set). We will store the results of that regression in an object called <code>lm_results</code>, using this code:</p>
+<pre><code>lm_results &lt;- lm(mpg ~ wt, mtcars)</code></pre>
+<div class="aside">
+<h3 id="section-an-aside">An aside…</h3>
+<p>We haven’t discussed the <code>~</code> operator (and won’t in this tutorial). It is used to create a <em>formula</em> object with the response on the left hand side and predictors on the right hand side. Here we are saying ‘<code>mpg</code> depends on <code>wt</code>’ and when used to create and fit a statistical model we would be estimating the parameters of</p>
+<p><span class="math display">\[\textrm{mpg} = \alpha + \beta \, \textrm{wt} + \epsilon\]</span></p>
+</div>
+<p><code>lm_results</code> is a list object. Your task is to use the <code>names()</code> function to see the names of the elements it contains, and then use double square brackets operator to extract three of the elements of <code>lm_results</code> and print out the contents of each element.</p>
+<div class="tutorial-exercise" data-label="lists-exercise-9" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>lm_results &lt;- lm(mpg ~ wt, mtcars)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="lists-exercise-9-solution" data-caption="Code" data-completion="0" data-diagnostics="0" data-startover="1" data-lines="0">
+<pre class="text"><code>lm_results &lt;- lm(mpg ~ wt, mtcars)
+
+names(lm_results)
+
+coeffs &lt;- lm_results[[&quot;coefficients&quot;]]
+print(coeffs)
+
+print(&#39;------------------------------&#39;) # just to visually separate the elements
+    
+residuals &lt;- lm_results[[&quot;residuals&quot;]]
+print(residuals)
+
+print(&#39;------------------------------&#39;) # just to visually separate the elements
+
+terms &lt;- lm_results[[&quot;terms&quot;]]
+print(terms)</code></pre>
+</div>
+</div>
+</div>
+<div id="section-summary" class="section level2">
+<h2>Summary</h2>
+<p>This concludes section 3 and our overview of matrices and lists.</p>
+<p>In section 4 we will look at <em>data frames</em>.</p>
+
+<script type="application/shiny-prerendered" data-context="server-start">
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+tutorial_options(exercise.completion = FALSE, exercise.diagnostics = FALSE)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::register_http_handlers(session, metadata = list(id = "au.edu.unsw.cbdrh.intro_to_R.section3", version = 0.1))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+session$onSessionEnded(function() {
+        learnr:::session_stop_event(session)
+      })
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-1-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-1-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-1-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-1-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-2-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-2-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-2-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-2-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-3-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-3-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-3-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-3-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-4-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-4-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-4-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-4-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-5-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-5-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-5-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-5-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-6-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-6-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-6-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-6-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-7-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-7-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-7-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-7-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-8a-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-8a-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-8a-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-8a-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-9-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-9-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-9-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-9-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-10-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-10-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-10-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-10-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-10a-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-10a-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-10a-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-10a-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-11-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-11-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-11-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-11-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-12-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-12-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-12-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-12-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-13-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-13-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-13-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-13-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-14-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-14-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-14-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-14-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-17-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-17-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-17-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-17-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrices-exercise-18-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrices-exercise-18-code-editor`)), session)
+output$`tutorial-exercise-matrices-exercise-18-output` <- renderUI({
+  `tutorial-exercise-matrices-exercise-18-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-visualising-matrices-exercise-2-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-visualising-matrices-exercise-2-code-editor`)), session)
+output$`tutorial-exercise-visualising-matrices-exercise-2-output` <- renderUI({
+  `tutorial-exercise-visualising-matrices-exercise-2-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-visualising-matrices-exercise-3-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-visualising-matrices-exercise-3-code-editor`)), session)
+output$`tutorial-exercise-visualising-matrices-exercise-3-output` <- renderUI({
+  `tutorial-exercise-visualising-matrices-exercise-3-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-visualising-matrices-exercise-5-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-visualising-matrices-exercise-5-code-editor`)), session)
+output$`tutorial-exercise-visualising-matrices-exercise-5-output` <- renderUI({
+  `tutorial-exercise-visualising-matrices-exercise-5-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-visualising-matrices-exercise-6-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-visualising-matrices-exercise-6-code-editor`)), session)
+output$`tutorial-exercise-visualising-matrices-exercise-6-output` <- renderUI({
+  `tutorial-exercise-visualising-matrices-exercise-6-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrix-arithmetic-exercise-2-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrix-arithmetic-exercise-2-code-editor`)), session)
+output$`tutorial-exercise-matrix-arithmetic-exercise-2-output` <- renderUI({
+  `tutorial-exercise-matrix-arithmetic-exercise-2-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrix-arithmetic-exercise-3-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrix-arithmetic-exercise-3-code-editor`)), session)
+output$`tutorial-exercise-matrix-arithmetic-exercise-3-output` <- renderUI({
+  `tutorial-exercise-matrix-arithmetic-exercise-3-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrix-arithmetic-exercise-6-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrix-arithmetic-exercise-6-code-editor`)), session)
+output$`tutorial-exercise-matrix-arithmetic-exercise-6-output` <- renderUI({
+  `tutorial-exercise-matrix-arithmetic-exercise-6-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrix-arithmetic-exercise-7-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrix-arithmetic-exercise-7-code-editor`)), session)
+output$`tutorial-exercise-matrix-arithmetic-exercise-7-output` <- renderUI({
+  `tutorial-exercise-matrix-arithmetic-exercise-7-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrix-arithmetic-exercise-9-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrix-arithmetic-exercise-9-code-editor`)), session)
+output$`tutorial-exercise-matrix-arithmetic-exercise-9-output` <- renderUI({
+  `tutorial-exercise-matrix-arithmetic-exercise-9-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-matrix-arithmetic-exercise-10-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-matrix-arithmetic-exercise-10-code-editor`)), session)
+output$`tutorial-exercise-matrix-arithmetic-exercise-10-output` <- renderUI({
+  `tutorial-exercise-matrix-arithmetic-exercise-10-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-lists-exercise-2-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-lists-exercise-2-code-editor`)), session)
+output$`tutorial-exercise-lists-exercise-2-output` <- renderUI({
+  `tutorial-exercise-lists-exercise-2-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-lists-exercise-3-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-lists-exercise-3-code-editor`)), session)
+output$`tutorial-exercise-lists-exercise-3-output` <- renderUI({
+  `tutorial-exercise-lists-exercise-3-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-lists-exercise-4-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-lists-exercise-4-code-editor`)), session)
+output$`tutorial-exercise-lists-exercise-4-output` <- renderUI({
+  `tutorial-exercise-lists-exercise-4-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-lists-exercise-5-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-lists-exercise-5-code-editor`)), session)
+output$`tutorial-exercise-lists-exercise-5-output` <- renderUI({
+  `tutorial-exercise-lists-exercise-5-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-lists-exercise-6-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-lists-exercise-6-code-editor`)), session)
+output$`tutorial-exercise-lists-exercise-6-output` <- renderUI({
+  `tutorial-exercise-lists-exercise-6-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-lists-exercise-7-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-lists-exercise-7-code-editor`)), session)
+output$`tutorial-exercise-lists-exercise-7-output` <- renderUI({
+  `tutorial-exercise-lists-exercise-7-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-lists-exercise-8-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-lists-exercise-8-code-editor`)), session)
+output$`tutorial-exercise-lists-exercise-8-output` <- renderUI({
+  `tutorial-exercise-lists-exercise-8-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-lists-exercise-9-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-lists-exercise-9-code-editor`)), session)
+output$`tutorial-exercise-lists-exercise-9-output` <- renderUI({
+  `tutorial-exercise-lists-exercise-9-result`()
+})
+</script>
+ <!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="dependencies">
+{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["3.6.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/3.6.0"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery-3.6.0.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquerylib"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/bootstrap"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/cerulean.min.css"]},{"type":"character","attributes":{},"value":["<style>h1 {font-size: 34px;}\n       h1.title {font-size: 38px;}\n       h2 {font-size: 30px;}\n       h3 {font-size: 24px;}\n       h4 {font-size: 18px;}\n       h5 {font-size: 16px;}\n       h6 {font-size: 12px;}\n       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}\n       pre:not([class]) { background-color: white }<\/style>"]},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.11"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["pagedtable"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/pagedtable-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/pagedtable.js"]},{"type":"character","attributes":{},"value":["css/pagedtable.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.11"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["9.12.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["textmate.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.11"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-format"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmarkdown/templates/tutorial/resources"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-format.js"]},{"type":"character","attributes":{},"value":["tutorial-format.css","rstudio-theme.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["3.6.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/3.6.0"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery-3.6.0.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquerylib"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["navigation"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/navigation-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tabsets.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.11"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["9.12.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["default.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.11"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["3.6.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/3.6.0"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery-3.6.0.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquerylib"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["font-awesome"]},{"type":"character","attributes":{},"value":["5.1.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/fontawesome"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/all.css","css/v4-shims.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.11"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootbox"]},{"type":"character","attributes":{},"value":["4.4.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/bootbox"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["bootbox.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["idb-keyvalue"]},{"type":"character","attributes":{},"value":["3.2.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/idb-keyval"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["idb-keyval-iife-compat.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]}]}
+</script>
+<!--/html_preserve-->
+<!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="execution_dependencies">
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40]}},"value":[{"type":"character","attributes":{},"value":["base","bslib","compiler","datasets","digest","ellipsis","evaluate","fastmap","graphics","grDevices","htmltools","htmlwidgets","httpuv","jquerylib","jsonlite","knitr","later","learnr","lifecycle","magrittr","markdown","methods","mime","promises","R6","Rcpp","rlang","rmarkdown","rprojroot","sass","shiny","stats","stringi","stringr","tools","utils","withr","xfun","xtable","yaml"]},{"type":"character","attributes":{},"value":["4.0.3","0.3.1","4.0.3","4.0.3","0.6.29","0.3.2","0.14","1.1.0","4.0.3","4.0.3","0.5.2","1.5.4","1.6.5","0.1.4","1.7.3","1.37","1.3.0","0.10.1","1.0.1","2.0.1","1.1","4.0.3","0.12","1.2.0.1","2.5.1","1.0.7","0.4.12","2.11","2.0.2","0.4.0","1.7.1","4.0.3","1.7.6","1.4.0","4.0.3","4.0.3","2.4.3","0.29","1.8-4","2.2.1"]}]}]}
+</script>
+<!--/html_preserve-->
+</div>
+
+</div> <!-- topics -->
+
+<div class="topicsContainer">
+<div class="topicsPositioner">
+<div class="band">
+<div class="bandContent topicsListContainer">
+
+<!-- begin doc-metadata -->
+<div id="doc-metadata">
+<h2 class="title toc-ignore" style="display:none;">Introduction to R: section 3</h2>
+</div>
+<!-- end doc-metadata -->
+
+</div> <!-- bandContent.topicsListContainer -->
+</div> <!-- band -->
+</div> <!-- topicsPositioner -->
+</div> <!-- topicsContainer -->
+
+
+</div> <!-- bandContent page -->
+</div> <!-- pageContent band -->
+
+
+
+
+<script>
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+
+</body>
+
+</html>

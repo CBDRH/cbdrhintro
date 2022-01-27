@@ -1,0 +1,756 @@
+---
+title: "Introduction to R: section 1"
+tutorial:
+  id: "au.edu.unsw.cbdrh.intro_to_R.section1"
+  version: 0.4
+output: 
+  learnr::tutorial:
+    progressive: false
+    allow_skip: true
+    css: css/intro.css
+runtime: shiny_prerendered
+description: "Section 1: Basics of R" 
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+tutorial_options(exercise.completion = FALSE, exercise.diagnostics = FALSE)
+```
+
+![](images/UNSW_2017_Big Data_landscape.jpg){width="75%"}
+
+## Overview
+
+This tutorial is broken into six sections.
+
+This section deals with
+
+ * An overview of R itself as a language
+ * Basic assignment
+ * Variable types
+ * Basic arithmetic operators: `+`, `-`, `*`, `/`, `^`
+ * Basic comparison operators: `<`, `<=`, `>`, `>=`, `==`, `!=`
+ * Basic logical operations: `&`, `|`, `^`, `!`
+ 
+<span class="copyright">© Copyright 2018 UNSW Sydney. All rights reserved except where otherwise stated.</span>
+
+## What is R?
+
+R is a high-level, open-source programming language.
+
+'High-level' means that the language abstracts away (hides) many of the arcane and messy details of writing program code to run on a computer. 
+
+This allows a programmer to concentrate on the task rather than on the characteristics of computer on which it will run. 
+
+It also means that such high-level program code tends to be highly portable.
+Code written on one type of computer, say, under macOS, will run unchanged (or almost unchanged) on, say, a Windows- or Linux-based computer. 
+
+## The origins of R
+
+The origins of R lie in a language called S, which was developed by the AT&T telecommunications company (formerly the Bell Telephone Company)
+in the US in the late 1970s and early 1980s, to speed up statistical analysis of telephone call and customer data. 
+
+The S language became a commercial software product called S/Plus,
+which rapidly became the language of choice for many statisticians,
+particularly those developing new statistical methods.
+
+In the early 1990s, two statisticians at the University of Auckland in New Zealand, Ross Ihaka and Robert Gentleman,
+decided to create an alternative to the S language, which was closely modelled on it,
+but which could be freely used on computers in their university without having to pay license fees. 
+
+They named this language R (after their shared first initial, and as a pun on the name 'S'). 
+
+Over the course of the 1990s and 2000s, R rapidly became very popular with statisticians,
+particularly those who were already using S or S/Plus,
+and eventually came to be arguably the dominant programming language for statistics and statistical graphics,
+and one of the most popular programming languages for data science, currently second only to Python. 
+
+## Free, open-source software
+
+Open-source software is software that is made available under a licence that allows others to use and/or modify the software code.
+
+Although this sounds like a recipe for chaos and anarchy,
+in practice it works very well and open-source software is now very widely used almost everywhere,
+including in mission-critical areas.
+Indeed, much of the internet runs on computers running the Linux operating system: Linux is open-source software.
+
+The free, open-source licensing for both R and Python means that anyone can install them on as many computers as they wish
+without having to pay any licensing fees. 
+
+This is a tremendous advantage: it means that skills in Python and R are highly portable between jobs or projects,
+because the software on which those skills have been acquired can be installed anywhere. 
+
+It also facilitates the use of Python and R with 'big data', which may require the use of many computers simultaneously,
+all running the same program code on different parts of the data in parallel. 
+
+## Software ecosystems
+
+The open-source licensing of both Python and R also means that anyone can modify or add to these software environments. 
+
+This has resulted in the growth of very large software ecosystems for both Python and R,
+in which (literally) tens of thousands of people have contributed extensions, add-in-packages and improvements for both languages. 
+
+For R, there is a large curated repository of such contributed code, called [CRAN](http://cran.r-project.org/) _(The Comprehensive R Archive Network)_,
+containing over 11,000 contributed packages, and growing rapidly. 
+
+So, in summary, R is a fully-featured, 'industrial-strength' programming language which is mature and highly trusted,
+and is very suitable for most data science and data analysis tasks. 
+
+## Which is better - R or some other language like Python? 
+
+Neither.
+Choosing to concentrate on a single language for all things would  be a mistake.
+While all modern computing languages are computationally equivalent (they can ultimately perform the same calculations)
+individually they have strength and weaknesses and certain things may be easier in one language or another.
+
+It can be argued that R has better support for both traditional and cutting-edge statistical analyses,
+but R has excellent support for many sub-disciplines like machine learning, geospatial data manipulation, graph data support among others.
+
+As a result, many data scientists are now using R as part of their toolkit,
+leveraging the particular strengths of the language where and when needed.
+
+R includes excellent features for working with other languages.
+For example, there is a very efficient data interchange format ([_feather_](https://github.com/wesm/feather)),
+which allows the combination of R and Python code in a single project.
+It is even possible to _embed_ a Python interpreter in R using the [_reticulate_](https://rstudio.github.io/reticulate/index.html) package,
+and an R interpreter in Python using the [_RPy2_](https://rpy2.bitbucket.io) package, allowing you to use both languages at once, sharing data in-memory.
+
+## A (not-so) quick introduction to programming in R
+
+This tutorial provides a quick introduction to programming in the R language.
+It is not intended as a comprehensive treatise on the R language,
+but rather as an introduction to give an idea of what it is like to write programs in R. 
+
+R requires you to write code to get most things done.
+There are no point-and-click interfaces that will do everything that you need to do: writing code is inescapable.
+
+But that's a **Good Thing™**, because actions performed through code are repeatable and reproducible actions,
+and the code coupled with a good source control system automatically provides an audit trail of how data has been manipulated
+and the process of arriving at the final analysis.
+
+## Names, objects and the assignment operator in R
+
+First up, assignment.
+
+R uses the compound symbol `<-` to associate a value with a name.
+
+Python and many other languages use `=` for this purpose,
+and a single equals sign also works for assignment in R too, but by convention, `<-` is used instead.
+
+In R, just referring to the name of an object by itself on a line is equivalent to printing out its value on the screen or console or output device,
+that is, the same as using the `print()` function.
+
+In the code box below, assign the value `2` to an object named `a`, and examine the value of `a`
+
+```{r assign-value, exercise=TRUE}
+
+```
+
+```{r assign-value-solution}
+a <- 2
+a
+```
+
+Congratulations, you've just written (or copied...) your first bit of R code! That wasn't too hard.
+
+Notice that the value `2` is printed out to the right of `[1]`. 
+
+As we shall see, all data in R are stored in vectors, which can contain more than one value.
+`[1]` here is just indicating that the value printed next to it is the first value in the vector `a`. 
+
+This becomes clearer if we assign the sequence of integers from 1 to 200 to an object called `b` and then print out its contents.
+In R, there is a handy short-hand for assigning a sequence of integers using the colon operator, thus: `1:200`.
+This notation is shorthand for a vector containing the 200 integer values from 1 to 200. 
+
+```{r assign-integer-vector, exercise=TRUE}
+
+```
+
+```{r assign-integer-vector-solution}
+b <- 1:200
+b
+```
+
+Now the output markers in square brackets make a bit more sense.
+
+But notice also that a single object, `b`, contains 200 values.
+That's because the fundamental data objects in R are, in fact, vectors.
+We'll look at vectors in more detail later.
+
+Incidentally, we can use any integers to start and stop the sequence.
+We don't have to start at one.
+We can even have the larger number first and generate the numbers in the vector in reverse order.
+Try looking at the sequences `5:10`, `-5:0` and `10:1` now.
+
+```{r integer-vector, exercise=TRUE}
+
+```
+
+```{r integer-vector-solution}
+5:10
+-5:0
+10:1
+```
+
+## Variable types in R
+
+As with other modern programming languages R supports different _types_ of values
+
+  * integers
+  * doubles (floating point numbers)
+  * strings
+  * logical values (`TRUE` and `FALSE`)
+
+It's even possible to declare new types of variables which is very important when programming.
+Having different types stops us from accidentally using one type of value where another is required.
+We'll see later with vectors that a vector must contain elements which are all the same type,
+_e.g._ all integers or all strings.
+
+### The integer data type
+
+_Integers_ are whole numbers.
+In R explicit integer values can be specified by affixing a capital `L` suffix.
+
+The following are all integers: `1L`, `5L`, -2L`, `0L`.
+
+```{r integer-data-type, exercise=TRUE}
+i <- 23L
+i
+class(i)
+```
+
+Integers and numerics are both numbers and can be compared.
+
+<div class="aside">
+### An aside...
+
+You'll notice the use of a function here: `class(i)`.
+A function in R is a chunk of code that performs a common task, bundled up and given a name for convenience.
+This is easier (and better practice) than repeating code over and over.
+A function is passed some information between the `()` and returns a result.
+There are many built in functions in R and even more than can be brought into a project from third-party libraries and packages.
+The `class()` function takes an R object and returns the information about that object that tells you how the object behaves.
+You won't need to use it much but it will show you the _type_ of a datum as R sees it.
+For example, these integers show up as `integer`.
+We'll see some other types (and some other functions) as we go on.
+</div>
+
+### The numeric (floating-point) data type
+
+The numeric data type in R is used to store decimal values,
+and these are equivalent to _floating point_ numbers or _reals_ in other languages. 
+
+<div class="under-the-bonnet">
+### Under the bonnet...
+A 64-bit floating point representation is used in the 64-bit version of R
+(there is no reason these days to use the 32-bit version of R except on some very old computers).
+It can sometimes be worth knowing the explicit sizes of things when dealing with huge amounts of data
+but we can ignore this size issue for now.
+</div>
+
+Numerics use the same internal format that is used for floating point values in a lot of other languages,
+and are thus subject to the same precision limitations as they are in nearly every other programming language.
+In other words, computers can store and represent floating-point or decimal numbers to a very high degree of precision,
+but they can't store them **exactly**, or, at least, not all floating point numbers.
+These precision issues arise because of the way numbers are stored in a finite number of bits.
+Generally this will only start to be a problem with extremely large or extremely small numbers or when trying to make exact comparisons.
+Further discussion of this is beyond the scope of this tutorial, but it is always worth bearing in mind.
+Note that this is not a limitation of R, it is true of **all** commonly used programming languages (including SAS).
+Just as decimal notation (base 10) is really good at denoting $\frac{1}{10}$ and not great at representing $\frac{1}{3}$
+a computer which uses binary (base 2) is really good at storing values like $\frac{1}{2}$ and $\frac{1}{16}$
+but not so good at representing $\frac{1}{10}$.
+
+For now, know that a double can have a fractional part (which may be zero), an integer cannot.
+
+The following are all doubles: `1`, `5`, `-2`, `0`, `2.5`, `4e9`.
+
+```{r numeric-data-type, exercise=TRUE}
+n <- 123.456
+n
+class(n)
+```
+
+Integers and doubles are both numbers and can be compared.
+
+### Strings
+
+Sequences of characters surrounded by quotes `""` are _strings_.
+
+A string is not a numeric value and cannot be compared directly with a numeric value.
+`"5"` and `5` are two different values even though they may look the same under some circumstances.
+Examining them directly in the console or using the environment tab in RStudio will show the difference.
+
+```{r strings-not-numerics, echo=TRUE}
+a = "5"
+b = 5
+a
+b
+class(a)
+class(b)
+```
+
+These values can be compared but such a comparison won't necessarily give the result one might naïvely expect for reasons we will look at later.
+
+There are whole set of functions for manipulating and looking for patterns within strings which we will look at in another tutorial.
+
+### The logical data type
+
+The values `TRUE` and `FALSE` are of a special type _logical_.
+
+Logical values are used to indicate the results of YES/NO type tests
+(True/False, Yes/No, 1/0, On/Off types of values)
+and to create masks which can be used to extract values from vectors.
+
+The logical data type in R is equivalent to the Boolean data type in other languages
+and is written in R code as the literals `TRUE` or `FALSE`.
+
+Logicals are returned by comparison expressions. Thus:
+
+```{r logical-data-type, exercise=TRUE}
+e <- (3 == 1) # is 3 equal to 1
+e
+class(e)
+
+f <- (18 < 20) # is 18 less than 20
+f
+class(f)
+```
+
+We'll look at these a little more later in this section.
+Note that `==` is not a typo but is the operator used for comparison.
+This is covered in more detail below.
+
+Also note the _comment_ in the code above.
+Comments in R are prefixed with a `#` sign.
+
+It's worth noting that for some purposes `FALSE` is the same as `0` and `TRUE` is the same as `1`.
+
+## Special values in R: `NA`, `Inf`, `-Inf`, `NaN` and `NULL`
+
+R supports several types of special values.
+
+The special value `NA` is used to indicate the _absence_ of a value,
+_e.g._ a missing value or a value which could not be converted properly.
+This value is very important and we'll be examining it in more detail later.
+
+The special values `Inf`, `-Inf` and `NaN` are used to indicate the result of certain mathematic operations,
+_e.g._ division by zero or the root of negative values.
+
+The value `NULL` is used to indicate a missing result (in a way different to `NA`),
+for example, when no option is available in a `switch()`.
+
+### Special values: `NA`
+
+The most commonly used special value is `NA`,
+which stands for 'not available' and is used to indicate the _absence_ of a value,
+_e.g._ a missing value or a value which could not be converted properly.
+This value is very important and we'll be examining it in more detail later.
+`NA` indicates 'there is supposed to be a value but we don't know what it is.'
+
+In real life, data values are often missing, or unknown,
+and being able to conveniently represent such missingness using a special value is a powerful feature.
+
+The `NA` value in R corresponds closely to the `None` value in Python or `nil` or `null` in some other languages.
+
+There are several important things about `NA` which you should bear in mind when using R.
+
+The first is that comparisons with `NA` are not possible.
+
+This may be surprising at first (especially if you use SAS or SPSS) but it makes perfect sense,
+since `NA` means 'I don't know what this value is' one can't know what the result of a comparison with `NA` would be.
+
+Note the error raised if `NA` is compared to a known value:
+
+```{r special-values-example-1, exercise=TRUE}
+e <- NA
+e
+if (e > 0) {
+  print("e is greater than zero")
+}
+```
+
+Instead, we can use `is.na()` function to test whether a value is `NA` or not:
+
+```{r special-values-example-2, exercise=TRUE}
+e <- NA
+
+is.na(e)
+```
+
+The other implication of the way R treats `NA` is that any arithmetic operation involving an `NA` will always return `NA` as the result.
+
+This also makes sense, because if we ask ourselves 'What is the sum of 2 plus 3 plus some unknown value?',
+the answer must be 'I don't know.'
+
+Try it:
+
+```{r special-values-example-5, exercise=TRUE}
+2 + 3 + NA
+```
+
+This propagation of `NA` in arithmetic and mathematical operations helps ensure consistent and correct results,
+but it means that even a single `NA` in a vector of values
+can result in arithmetic functions operating on that vector returning `NA` as the result.
+
+Bear in mind this 'infectious' nature of `NA` and we will look at it in more detail later.
+
+It is always good practice to consider whether there might be missing values in your data when using R,
+and think about how to handle them in your code.
+
+### Special values: `Inf` and `-Inf`
+
+There are several other special values available in R: `Inf` and `-Inf`, `NaN`, and `NULL`.
+
+`Inf` and `-Inf` represent infinity and minus infinity, and are thus greater and less than any other number, respectively.
+
+Use the `is.infinite()` function to determine whether a value is infinite.
+
+Consider the case of division by zero:
+
+```{r special-values-example-9, exercise=TRUE}
+a <- 3.2 / 0
+a
+class(a)
+is.infinite(a)
+```
+
+Note that this behaviour is different to many other languages,
+which throw a runtime error (or raises a runtime exception) when division by zero is attempted
+(or even continue with undefined behaviour).
+
+### Special values: `NaN`
+
+`NaN` in R represents 'Not a Number' and is used wherever a numeric value is not a number.
+
+This sounds like a contradiction, but consider the following mathematical operation
+(the `sqrt()` function returns the square root of its argument).
+Note the warning message from R.
+
+```{r special-values-example-10, exercise=TRUE}
+a <- -4
+b <- sqrt(a)
+b
+class(b)
+is.nan(b)
+```
+
+### Special values: `NULL`
+
+`NULL` in R represents 'there is no value.'
+
+Note that this is different from `NA` which represents a 'missing' value,
+_i.e._ `NA` there is supposed to be a value but we don't know what it is.
+`NULL` is used, for example, when no option is available in a `switch()`.
+
+Use the `is.null()` function to determine whether a value is `NULL`.
+
+### Activity: special values
+
+Write R code for
+
+  * two expressions
+    * each using a different R mathematical function (try finding root and log)
+    * that return a `NaN` value when certain values are used.
+
+```{r special-values-exercise-1, exercise=TRUE, exercise.lines=12}
+
+```
+
+```{r special-values-exercise-1-hint}
+# square root of -3
+a <- sqrt(-3)
+a
+
+# log of a negative number
+b <- log(-3)
+b
+```
+
+### The complex data type
+
+Complex numbers are like real numbers but have an additional imaginary part.
+They are used in particular types of mathematical calculations,
+and allow otherwise impossible calculations such as taking the square root of a negative number. 
+
+R supports complex numbers as a built-in data type,
+but we will not discuss them further in this tutorial.
+The `complex()` function is used to create a complex number in R.
+
+```{r complex-data-type, exercise=TRUE}
+cmplx <- complex(real=123.4567, imaginary=3)
+cmplx
+class(cmplx)
+```
+
+## Arithmetic expressions in R
+
+R uses fairly standard arithmetic operators, the same as or very similar to many other programming languages.
+Examine the output of the following (after running the code):
+
+```{r operators-example-1, exercise=TRUE}
+a <- 5
+b <- 2
+
+# addition
+a + b
+
+# subtraction
+a - b
+
+# multiplication
+a * b
+
+# division
+a / b
+```
+
+And these:
+
+```{r operators-example-2, exercise=TRUE}
+a <- 5
+b <- 2
+
+# integer division
+a %/% b
+
+# exponentiation
+a^b
+
+# same as
+a**b
+
+# modulus (remainder)
+a %% b
+```
+
+When writing arithmetic or mathematical expressions in R, or any other programming language,
+always bear in mind the order of precedence of arithmetic operations, and use brackets as necessary.
+
+```{r operators-example-3, exercise=TRUE}
+a <- 2
+b <- 3
+c <- 5
+
+a * b + c
+```
+
+```{r operators-example-set-up}
+a <- 2
+b <- 3
+c <- 5
+```
+
+That does not give the same result as:
+
+```{r operators-example-4, exercise=TRUE, exercise.setup="operators-example-set-up"}
+a * (b + c)
+```
+
+The standard order of operations (which both R and Python use) is:
+
+  1. honour brackets first
+  1. then exponents and roots
+  1. then multiplication and division
+  1. then addition and subtraction
+
+The associativity of operators also matters. Most operators are left-to-right associative. For example:
+
+```{r operators-example-5, exercise=TRUE, exercise.setup="operators-example-set-up"}
+a / b / c
+```
+
+In the example above, `a` is first divided by `b`, and the result of that division is then divided by `c`
+(that is, the operators are associated in a left-to-right direction).
+
+Use brackets to override this:
+
+```{r operators-example-6, exercise=TRUE, exercise.setup="operators-example-set-up"}
+a / (b / c)
+```
+
+The exceptions to the left-to-right associative rule are the exponentiation operator `^`, and the assignment operator `<-` (or `=`):
+
+```{r operators-example-7, exercise=TRUE, exercise.setup="operators-example-set-up"}
+a ^ b ^ c
+
+a ^ (b ^ c) # same as a ^ b ^ c
+
+(a ^ b) ^ c
+```
+
+## Coding style
+
+This is a good point at which to make a little comment on coding style.
+Code readability can be massively improved by the use of appropriate white space.
+Putting a space around operators is a good idea (noting that `()` are not operators, don't put spaces inside brackets).
+This isn't a hard and fast rule but a guide.
+The important point is _readability_ not rigid adherence to a rule (this implies the choice of sensible descriptive variable names).
+
+Consider the difference between
+
+```
+x<-a/(b/100)^2
+```
+
+and
+
+```
+bmi <- weight / (height / 100) ^ 2
+```
+
+When multiple people collaborate on a project it's important that there's a shared understanding of an accepted style for the project.
+The aim is to not to develop a style that pleases everyone (that's rarely possible) but which offends everyone equally 😁.
+
+In other words, you shouldn't try to please everyone but in all likelihood someone will complain about something.
+You might like to read some style guides:
+
+ * [Google's R Style Guide](https://google.github.io/styleguide/Rguide.xml)
+ * [the style guide from _Advanced R_](http://adv-r.had.co.nz/Style.html)
+ 
+You don't have to read these now, they contain a lot of things we haven't covered yet,
+but if you come back here at the end of the tutorial and read them and they'll make a lot more sense.
+
+## Comparison and logical expressions in R
+
+### Comparison expressions
+
+The comparison operators in R are the same as many other programming languages.
+
+They compare two values or expressions and return `TRUE` or `FALSE` (or `NA`, as we shall see later)
+depending on whether the comparison expression is true or false.
+
+We will be using the following variables:
+
+```
+a <- 2
+b <- 3
+```
+
+```{r comparisons-example-set-up}
+a <- 2
+b <- 3
+```
+
+```{r comparisons-example-1, exercise=TRUE, exercise.setup="comparisons-example-set-up"}
+# less than
+a < b
+```
+
+```{r comparisons-example-2, exercise=TRUE, exercise.setup="comparisons-example-set-up"}
+# less than or equal to
+a <= b
+```
+
+You should complete the following in the same vein, comparing `a` to `b` using the given comparison and run each.
+
+```{r comparisons-example-3, exercise=TRUE, exercise.setup="comparisons-example-set-up"}
+# greater than
+
+
+```
+
+```{r comparisons-example-3-hint}
+a > b
+```
+
+```{r comparisons-example-4, exercise=TRUE, exercise.setup="comparisons-example-set-up"}
+# greater than or equal to
+
+
+```
+
+The double equals sign operator `==` is used for equality comparisons,
+not a single equals sign `=`. The single equals sign `=` is the same as the assignemnt operator `<-` in R as previously mentioned.
+
+```{r comparisons-example-5, exercise=TRUE, exercise.setup="comparisons-example-set-up"}
+# exactly equal to - note double equals signs
+a == b
+
+```
+
+As with many programming languages `!` is associated with negation.
+The exclamation mark `!` is the negation operator in R.
+The 'not equal to' operator is `!=`
+
+```{r comparisons-example-6, exercise=TRUE, exercise.setup="comparisons-example-set-up"}
+# not equal to
+a != b
+
+```
+
+### Logical expressions
+
+The logical operators are also important, and differ from those used in some other languages:
+
+```
+d <- TRUE
+e <- FALSE
+f <- TRUE
+```
+
+```{r logical-comparisons-set-up}
+d <- TRUE
+e <- FALSE
+f <- TRUE
+```
+
+```{r comparisons-example-7, exercise=TRUE, exercise.setup="logical-comparisons-set-up"}
+# and (logical conjunction)
+d & e
+d & f
+```
+
+
+```{r comparisons-example-8, exercise=TRUE, exercise.setup="logical-comparisons-set-up"}
+# or (logical disjunction)
+d | e
+d | f
+```
+
+```{r comparisons-example-8a, exercise=TRUE, exercise.setup="logical-comparisons-set-up"}
+# exclusive or (logical exclusive disjunction)
+xor(d, e)
+xor(d, f)
+```
+
+<div id="comparisons-example-8a-hint">
+_Exclusive or_ is true if and only if only one of its arguments is true.
+Exclusive or in R is a function of two arguments `xor()`.
+
+|  A    |  B    | xor(A, B) |
+|:-----:|:-----:|:---------:|
+| TRUE  | TRUE  | FALSE     |
+| TRUE  | FALSE | TRUE      |
+| FALSE | TRUE  | TRUE      |
+| FALSE | FALSE | FALSE     |
+</div>
+
+
+```{r comparisons-example-9, exercise=TRUE, exercise.setup="logical-comparisons-set-up"}
+# not (logical negation)
+!d
+!e
+!(d == e)
+```
+
+```{r comparisons-example-10, exercise=TRUE, exercise.setup="logical-comparisons-set-up"}
+# testing if a value is TRUE
+d == TRUE
+
+# equivalent
+isTRUE(d)
+```
+
+```{r comparisons-example-11, exercise=TRUE, exercise.setup="logical-comparisons-set-up"}
+# testing if a value is FALSE
+e == FALSE
+# equivalent
+!isTRUE(e)
+```
+
+## Summary
+
+This concludes section 1 and our overview of basic assignment and arithmetic and logical operators.
+
+Continue with section 2 where we will look at some basic R data structures including the all-important _vector_.

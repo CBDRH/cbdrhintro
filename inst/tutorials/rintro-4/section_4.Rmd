@@ -1,0 +1,1085 @@
+---
+title: "Introduction to R: section 4"
+tutorial:
+  id: "au.edu.unsw.cbdrh.intro_to_R.section4"
+  version: 0.2
+output: 
+  learnr::tutorial:
+    progressive: false
+    allow_skip: true
+    css: css/intro.css
+runtime: shiny_prerendered
+description: "Section 4: Dataframes"
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+tutorial_options(exercise.completion = FALSE, exercise.diagnostics = FALSE)
+```
+
+![](images/UNSW_2017_Big Data_landscape.jpg){width="75%"}
+
+## Overview
+
+This tutorial is broken into six sections.
+
+This section deals with mainly with _data frames._
+
+ * The factor data type
+ * Data frames
+ * Subsetting data frames
+ * `attach()`, `detach()` and `with()`
+ * Combining and merging data frames 
+ * Reading data from CSV files
+ * Reading data from databases
+
+<span class="copyright">© Copyright 2018 UNSW Sydney. All rights reserved except where otherwise stated.</span>
+
+## The factor data type
+
+There is a core data type in R which we haven't yet mentioned: the _factor_ data type.
+
+Factors are used to represent and store _categorical data_ or _ordinal data._
+Categorical data are things with a finite number of possible values (the number of possible values is called the _cardinality_).
+Phenotypic sex is an example, and might be represented by, say, the categories female, male, indeterminant and missing (`NA`).
+
+These could readily be stored in a character vector, such as the following vector for a set of 8 patients:
+
+```{r exercise=FALSE, echo=TRUE}
+sex <- c("Male", "Male", "Female", "Indeterminate", NA, "Indeterminate", "Female", "Female")
+```
+
+That works OK, but each character string in the vector takes up quite a lot of space in the computer's memory
+(and remember that R stores all working data in memory), which can be a problem with very large data sets.
+It also allows us to accidentally add data with misspelt categories:
+
+```{r factors-examples-set-up-a}
+sex <- c("Male", "Male", "Female", "Indeterminate", NA, "Indeterminate", "Female", "Female")
+sex_factor <- factor(sex)
+```
+
+```{r factors-example-2, exercise=TRUE, exercise.setup="factors-examples-set-up-a"}
+# "Indeterminant" is a misspelling
+sex <- c("Male", "Male", "Female", "Indeterminate", NA, "Indeterminant", "Female", "Female")
+sum(sex == "Male", na.rm=TRUE) +
+    sum(sex == "Female", na.rm=TRUE) +
+    sum(sex == "Indeterminate", na.rm=TRUE) +
+    sum(is.na(sex))
+```
+
+As you can see, the above code does not sum to `r length(sex)` because of the misspelt value.
+
+A similar issue is that using strings allows values which aren't just misspelt but which aren't even part of the category domain.
+
+```{r factors-example-2a, exercise=TRUE, exercise.setup="factors-examples-set-up-a"}
+# "Unknown" is not a valid value for phenotypic sex
+sex <- c("Male", "Male", "Female", "Unknown", NA, "Indeterminate", "Female", "Female")
+sum(sex == "Male", na.rm=TRUE) +
+    sum(sex == "Female", na.rm=TRUE) +
+    sum(sex == "Indeterminate", na.rm=TRUE) +
+    sum(is.na(sex))
+```
+
+The factor data type overcomes both these problems.
+Factors efficiently store categorical data in memory,
+and ensure that only the predefined categories can be included in the factor vector.
+
+Also, many statistical (or machine learning) functions, such as model fitting,
+need to treat categorical data differently from numeric data.
+
+If data are stored using the factor data type,
+these functions will handle the factor type and treat those data columns appropriately in the model fitting process.
+
+Factors are created using the `factor()` or `as.factor()` functions:
+
+```{r factors-example-4, exercise=FALSE, echo=TRUE, exercise.setup="factors-examples-set-up-a"}
+sex_factor <- factor(sex)
+sex_factor
+class(sex)
+class(sex_factor)
+```
+
+We can see what the defined levels (categories) are for a factor using the `levels()` function.
+
+```{r factors-example-5, exercise=TRUE, exercise.setup="factors-examples-set-up-a"}
+levels(sex_factor)
+```
+
+Note that attempts to add data containing undefined levels to a factor vector will result in a warning and an `NA` being inserted instead:
+
+```{r factors-example-6, exercise=TRUE, exercise.setup="factors-examples-set-up-a"}
+sex_factor[9] <- "Unknown"
+sex_factor
+```
+
+Factors are also useful for applying meaningful labels to coded values (similar to 'formats' in the SAS language):
+
+```{r factors-example-7, exercise=TRUE}
+# here 1 represents male, 2 represents female
+sex <- c(1, 1, 2, 1, 2, 2, 2, 1)
+sex
+```
+
+```{r factors-examples-set-up-b}
+sex <- c(1, 1, 2, 1, 2, 2, 2, 1)
+sex_factor <- factor(sex, levels=c(1, 2), labels=c("Male", "Female"))
+```
+
+```{r factors-example-8, exercise=TRUE, exercise.setup="factors-examples-set-up-b"}
+sex_factor <- factor(sex, levels=c(1, 2), labels=c("Male", "Female"))
+sex_factor
+```
+
+Note that the labels for a factor must be used in logical comparison expressions, not the levels:
+
+```{r factors-example-9, exercise=TRUE, exercise.setup="factors-examples-set-up-b"}
+x <- sex_factor[sex_factor == 1]
+x
+length(x)
+```
+
+```{r factors-example-10, exercise=TRUE, exercise.setup="factors-examples-set-up-b"}
+y <- sex_factor[sex_factor == "Male"]
+y
+length(y)
+```
+
+Factors may also be ordered, that is, they may be categories which have a natural order, in which case they are referred to as _ordinals_:
+
+```{r ordinals-example-1, exercise=TRUE}
+pain <- ordered(c(2, 3, 3, 1, 4, 3, 5, 1), levels=1:5, 
+                labels=c("No pain", "A little pain", "Some pain", "Very painful", "Excruciating"))
+pain
+class(pain) # note this returns two classes!
+```
+
+Because they are discrete categories without any natural order or ranking
+the values of a factor cannot be compared with each other, except for equality.
+Ordinals, however, can be compared with each other, and ranked:
+
+```{r factors-examples-set-up-c}
+sex <- c(1, 1, 2, 1, 2, 2, 2, 1)
+sex_factor <- factor(sex, levels=c(1,2), labels=c("Male", "Female"))
+pain <- ordered(c(2, 3, 3, 1, 4, 3, 5, 1), levels=1:5, 
+                labels=c("No pain", "A little pain", "Some pain", "Very painful", "Excruciating"))
+```
+
+
+```{r ordinals-example-2, exercise=TRUE, exercise.setup="factors-examples-set-up-c"}
+sex_factor[1]
+sex_factor[3]
+# trying to compare factors without an ordering fails
+sex_factor[1] > sex_factor[3]
+```
+
+
+```{r ordinals-example-3, exercise=TRUE, exercise.setup="factors-examples-set-up-c"}
+pain[1]
+pain[5]
+# ordinals (factors with an ordering) can be compared
+pain[5] < pain[1]
+```
+
+### Creating a factor from continuous numeric data
+
+A very common requirement is to divide a continuous numeric variable into groups,
+such as dividing an age variable (measured in years) into, say, 10-year age groups.
+
+In many programming languages, you would use a series of `if...then...else` or `case` statements to allocate each age value to an age group.
+You can do that in R too, of course, but R also provides a convenience function for this task: `cut()`
+
+`cut()` takes a numeric vector (which could be a column in a data frame), and a vector of cut-points,and returns a factor vector.
+An example makes this clearer.
+
+First, let's create a numeric vector called `age` and fill it with 2000 random values between 0 and 100.
+Let's claim these are the ages of marathon runners, in fractional years:
+
+```{r cut-examples-set-up-a}
+set.seed(111)
+age <- rlnorm(2000, log(32), log(1.3))
+cut_points <- seq(0, 100, by=10)
+```
+
+```{r cut-example-1, exercise=TRUE, exercise.setup="cut-examples-set-up-a"}
+age <- rlnorm(2000, log(32), log(1.3))
+# Examine the first 20 values
+head(age, n=20)
+```
+
+```{r cut-example-2, exercise=TRUE, exercise.setup="cut-examples-set-up-a"}
+# examine the distribution using a histogram
+hist(age, breaks=50, xlim=range(0, 100))
+```
+
+We explicitly set the limits for the x-axis of the graph here to avoid plotting artefacts from the range of values we're plotting,
+_i.e._ it's to make the plot look nicer.
+Try taking out the `xlim=range(0, 100)` argument to see.
+
+OK, now let's create a new vector which contains an age group factor value for each of those 2000 age values, using `cut()`.
+We can use the `seq()` function to conveniently create a vector of cut-points.
+
+```{r cut-example-3, exercise=TRUE, exercise.setup="cut-examples-set-up-a"}
+cut_points <- seq(0, 100, by=10)
+cut_points
+
+# use the cut_points vector to divide age into age groups
+# we use right=FALSE because we want our intervals to be closed on the left and open on the right: [a, b)
+# we use include.lowest=TRUE because we want values on the open boundary of the edge bin to be included
+agegrp <- cut(age, breaks=cut_points, include.lowest=TRUE, right=FALSE)
+
+# check the class of agegrp
+class(agegrp)
+
+# it's a factor, so let's check the valid levels of agegrp
+levels(agegrp)
+```
+
+Notice that `cut()` has automatically constructed factor labels based on the cut-points we specified.
+You can manually provide nicer labels if you wish and you'll usually want to do this.
+Automatically generated factor labels based on numeric intervals can be completely accurate yet completely unreadable.
+
+Also, since age group has an intrinsic ordering, we can ask `cut()` to create an ordered factor using an additional argument:
+
+```{r cut-example-4, exercise=TRUE, exercise.setup="cut-examples-set-up-a"}
+agegrp_labels <- c('0-9 yrs', '10-19 yrs', '20-29 yrs', '30-39 yrs', '40-49 yrs',
+                   '50-59 yrs', '60-69 yrs', '70-79 yrs', '80-89 yrs', '90+ yrs')
+agegrp <- cut(age, breaks=cut_points, labels=agegrp_labels, include.lowest=TRUE, right=FALSE, ordered_result=TRUE)
+class(agegrp)
+levels(agegrp)
+```
+
+```{r cut-examples-set-up-b}
+set.seed(111)
+age <- rlnorm(2000, log(32), log(1.3))
+cut_points <- seq(0, 100, by=10)
+agegrp_labels <- c('0-9 yrs', '10-19 yrs', '20-29 yrs', '30-39 yrs', '40-49 yrs',
+                   '50-59 yrs', '60-69 yrs', '70-79 yrs', '80-89 yrs', '90+ yrs')
+agegrp <- cut(age, breaks=cut_points, labels=agegrp_labels, include.lowest=TRUE, right=FALSE, ordered_result=TRUE)
+```
+
+```{r cut-example-5, exercise=TRUE, exercise.setup="cut-examples-set-up-b"}
+# print the first few values of agegrp
+head(agegrp)
+```
+
+```{r cut-example-6, exercise=TRUE, exercise.setup="cut-examples-set-up-b"}
+# print a frequency table of agegrp
+table(agegrp)
+```
+
+```{r cut-example-7, exercise=TRUE, exercise.setup="cut-examples-set-up-b"}
+# finally, notice that a bar chart of the frequencies of agegrp mirrors the distribution of age
+hist(age, breaks = 10, xlim=range(0, 100))
+barplot(table(agegrp), las=2)
+```
+
+Note: the `las=2` argument rotates the x-axis labels by 90°.
+
+Enough about factors.
+It's important to know what they are as they are very useful and we'll be using them as we go on to talk about data frames.
+
+## Data frames
+
+Data frames are central to most data management and manipulation tasks in R.
+
+Data frames in R are a special type of data structure in which each element is
+a vector representing a column of data in a rectangular (tabular) data structure.
+
+The vectors are constrained such that each column of a data frame must have the same number of elements in the vector which comprises it.
+Since all the columns in a data frame must have the same number of rows,
+each column vector in a data frame must have the same number of elements (be the same length).
+
+A data frame is therefore a tabular (rectangular) data structure.
+Each row is a record (_observation_) and each column is a _variable_, to use a common terminology.
+
+Note, however, that data frames are created column-wise,
+not row-wise as is more usual with databases or in systems like SAS or SPSS.
+
+This is easier to understand with an example.
+The `data.frame()` function is used to construct data frame objects:
+
+```{r data-frames-example-1, exercise=FALSE, echo=TRUE}
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          sex=c("F", "F", "M", "F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+
+patients_df
+
+class(patients_df)
+```
+
+```{r data-frames-examples-set-up-a}
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          sex=c("F", "F", "M", "F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+```
+
+```{r data-frames-examples-set-up-b}
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          sex=c("F", "F", "M", "F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+rownames(patients_df) <- c("Wilma", "Betty", "Fred", "Pebbles")
+colnames(patients_df)[4] <- "height_in_cm"
+```
+
+We can examine (and manipulate) the names of the columns in a data frame:
+
+```{r data-frames-example-2, exercise=TRUE, exercise.setup="data-frames-examples-set-up-a"}
+names(patients_df)
+
+# or the same thing
+colnames(patients_df)
+
+# rows can have names too in data frames
+rownames(patients_df)
+```
+
+Data frames by default have row names which are just sequential numbers, but the row names can be used to hold more meaningful data.
+
+However, it is generally a better idea to store any data that you may need to use to filter by row on
+or carry out calculations on as a column in the data frame itself,
+rather than in the rowname attribute for each row.
+
+Column names can be modified using the `names()` or `colnames()` function:
+
+```{r data-frames-example-3, exercise=TRUE, exercise.setup="data-frames-examples-set-up-a"}
+rownames(patients_df) <- c("Wilma", "Betty", "Fred", "Pebbles")
+
+colnames(patients_df)[4] <- "height_in_cm"
+
+patients_df
+```
+
+Individual values in a data frame can be referenced using the same square brackets operators as used for vectors, matrices and arrays,
+specifying the row index first and then the column:
+
+```{r data-frames-example-4, exercise=TRUE, exercise.setup="data-frames-examples-set-up-b"}
+# row 2, column 2
+patients_df[2, 2]
+```
+
+```{r data-frames-example-5, exercise=TRUE, exercise.setup="data-frames-examples-set-up-b"}
+# all rows except row 2, all columns except column 2
+patients_df[-2, -2] 
+```
+
+```{r data-frames-example-6, exercise=TRUE, exercise.setup="data-frames-examples-set-up-b"}
+# rows 3 and 4, columns 3 and 5
+patients_df[c(3, 4), c(3, 5)]
+```
+
+You can select cells in a data frame by name.
+
+```{r data-frames-example-7, exercise=TRUE, exercise.setup="data-frames-examples-set-up-b"}
+# row named Fred, column named age (returns a single value)
+patients_df["Fred", "age"]
+# the sex and age of Fred and Wilma (returns a data frame)
+patients_df[c("Fred", "Wilma"), c("sex", "age")]
+```
+
+In our example both columns and rows have names but usually only columns have names.
+It's more common, therefore to select rows using an index vector or even more commonly by a logical vector.
+
+```{r data-frames-example-8, exercise=TRUE, exercise.setup="data-frames-examples-set-up-b"}
+patients_df[c(TRUE, FALSE, FALSE, TRUE),]
+```
+
+Notice the trailing `,` between the `[ ]`.
+A common mistake is to leave this out and end up subsetting by column rather than row.
+
+<div class="under-the-bonnet">
+### Under the bonnet...
+
+Data frames are just specialised versions of lists.
+Operations that can be performed on lists are performed the same way on data frames.
+Hence, leaving out the `,` means columns are being selected rather than rows.
+</div>
+
+```{r exercise=FALSE, echo=FALSE}
+mask <- c(TRUE, FALSE, FALSE, TRUE)
+```
+
+Notice the difference in result with and without the `,`.
+With the `,` we are selecting rows.
+Without the `,` we are selecting columns.
+There are `r length(patients_df)` columns so the masking vector gets recycled and effectively turned into the mask
+<code>`r paste0("c(", paste(rep(mask, length(patients_df))[1:length(patients_df)], collapse=", "), ")")`</code>
+to select the columns from `patients_df` where the mask is `TRUE`.
+
+```{r data-frames-example-8a, exercise=FALSE, echo=TRUE, exercise.setup="data-frames-examples-set-up-b"}
+# select by row
+patients_df[c(TRUE, FALSE, FALSE, TRUE),]
+# select by column (missing ,)
+patients_df[c(TRUE, FALSE, FALSE, TRUE)]
+```
+
+However, it's also quite common to select columns from a data frame by name.
+Note that both of these give the same result but one has a `,` and one does not.
+
+```{r data-frames-example-8b, exercise=FALSE, echo=TRUE, exercise.setup="data-frames-examples-set-up-b"}
+# select columns by name using row, column notation
+patients_df[,c("sex", "weight")]
+# select columns by name treating the data frame as a list of named columns
+patients_df[c("sex", "weight")]
+```
+
+### The $ notation for accessing columns
+
+To select a single column we can use a special notation involving `$`.
+Named columns in a data frame can be referenced using the notation `data_frame$column_name`,
+_e.g._ `patients_df$sex`.
+This references just that column vector and acts just like that column vector
+so everything one can do to a vector one can do to a column of a data frame using this notation
+
+```{r data-frames-example-8c, exercise=FALSE, echo=TRUE, exercise.setup="data-frames-examples-set-up-b"}
+# select the height column
+patients_df$height
+# select the weight column
+patients_df$weight
+```
+
+<div class="under-the-bonnet">
+### Under the bonnet...
+
+If you worked through section 3 on lists you will have seen this notation.
+Data frames are just specialised versions of lists so the `$` notation works on them as well.
+</div>
+
+### Adding a new column to a data frame
+
+To add a column, we can use any of these methods:
+
+```{r data-frames-example-9, exercise=TRUE, exercise.setup="data-frames-examples-set-up-b"}
+# using row, column notation
+patients_df[,"postcode"] <- c("2202", "3405", "2022", "2119")
+# using $ to explicitly name a column
+patients_df$country_of_birth <- c("Australia", "Germany", "Indonesia", "UK")
+# using list notation
+# nrow() returns the number of rows in a data frame
+patients_df["fives"] <- rep(5, nrow(patients_df))
+
+patients_df
+```
+
+```{r data-frames-examples-set-up-c}
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          sex=c("F", "F", "M", "F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+rownames(patients_df) <- c("Wilma", "Betty", "Fred", "Pebbles")
+colnames(patients_df)[4] <- "height_in_cm"
+patients_df[,"postcode"] <- c("2202", "3405", "2022", "2119")
+patients_df$country_of_birth <- c("Australia", "Germany", "Indonesia", "UK")
+patients_df$fives <- rep(5, 4)
+```
+
+Similarly, columns can be deleted by assigning NULL to them:
+
+```{r data-frames-example-10, exercise=TRUE, exercise.setup="data-frames-examples-set-up-c"}
+patients_df$country_of_birth <- NULL
+
+patients_df
+```
+
+```{r data-frames-examples-set-up-d}
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          sex=c("F", "F", "M", "F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+rownames(patients_df) <- c("Wilma", "Betty", "Fred", "Pebbles")
+colnames(patients_df)[4] <- "height_in_cm"
+patients_df[,"postcode"] <- c("2202", "3405", "2022", "2119")
+```
+
+Note the different classes of returned in the following examples.
+If a single column is returned, it is as a vector.
+If more than one column is returned, then it is necessarily returned as a data frame.
+
+```{r data-frames-example-11, exercise=TRUE, exercise.setup="data-frames-examples-set-up-d"}
+a <- patients_df[,"weight"]
+class(a)
+a
+```
+
+```{r data-frames-example-12, exercise=TRUE, exercise.setup="data-frames-examples-set-up-d"}
+b <- patients_df[,c("sex", "weight")]
+class(b)
+b
+```
+
+There is one other way of selecting columns from a data frame,
+and that is using the square brackets operator with a single argument (no comma).
+In this case, one or more columns (not rows) are returned, as a data frame,
+not as a bare vector, even when a single column is requested.
+
+Compare these examples, paying close attention to whether single or double square brackets are used:
+
+```{r data-frames-example-13, exercise=TRUE, exercise.setup="data-frames-examples-set-up-d"}
+w <- patients_df["weight"]
+class(w)
+w
+```
+
+```{r data-frames-example-14, exercise=TRUE, exercise.setup="data-frames-examples-set-up-d"}
+x <- patients_df[["weight"]]
+class(x)
+x
+```
+
+```{r data-frames-example-15, exercise=TRUE, exercise.setup="data-frames-examples-set-up-d"}
+y <- patients_df[c("sex", "weight")]
+class(y)
+y
+```
+
+<div class="under-the-bonnet">
+### Under the bonnet...
+
+If you haven't done section 3 yet and covered lists you may safely skip this section on your first pass through
+this tutorial and come back to it after reading section 3.
+
+Recall, a data frame is a list of vectors.
+This should help you understand what is going on when you use `[[ ]]`, `[ ]`, `$`, or `[..., ...]` to subset a data frame.
+
+$$
+\textrm{patients_df} \leftarrow [[ \left( \matrix{123 \\ 876 \\ 935 \\ 263} \right) \left( \matrix{\textrm{"F"} \\ \textrm{"F"} \\ \textrm{"M"} \\ \textrm{"F"}} \right) \left( \matrix{23 \\ 47 \\ 36 \\ 78} \right) \left( \matrix{167 \\ 181 \\ 178 \\163} \right) \left( \matrix{\textrm{"Wilma"} \\ \textrm{"Betty"} \\ \textrm{"Fred"} \\ \textrm{"Pebbles"}} \right) ]]
+$$
+</div>
+
+## Subsetting data frames
+
+We have seen above that a logical vector can be used to select or subset rows in a data frame.
+Recall that logical comparison expressions involving a vector themselves return a logical vector (a 'mask' of `TRUE` and `FALSE` values).
+
+Thus, we can use comparison expressions directly to subset a data frame based on the values in specific columns in that data frame.
+Examine these examples:
+
+```{r data-frames-example-16, exercise=TRUE, exercise.setup="data-frames-examples-set-up-d"}
+# create a subset of female patients only
+d <- patients_df[patients_df$sex == "F",]
+d
+```
+
+```{r data-frames-example-17, exercise=TRUE, exercise.setup="data-frames-examples-set-up-d"}
+# create a subset of patients taller than 170 cm
+e <- patients_df[patients_df$height_in_cm > 170,]
+e
+```
+
+```{r data-frames-example-18, exercise=TRUE, exercise.setup="data-frames-examples-set-up-d"}
+# create a subset of female patients taller than 170 cm
+f <- patients_df[patients_df$sex == "F" & patients_df$height_in_cm > 170,]
+f
+```
+
+```{r data-frames-example-19, exercise=TRUE, exercise.setup="data-frames-examples-set-up-d"}
+# create a subset of female patients taller than 170 cm or who live in postcode 2119
+g <- patients_df[(patients_df$sex == "F" & patients_df$height_in_cm > 170) | patients_df$postcode == "2119",]
+g
+```
+
+Note the use of `&` for logical AND and `|` for logical OR when combining logical vectors (the `!` negation operator can also be used).
+
+It is very important to be familiar with the precedence rules for these operators:
+just like unary minus is performed before multiplication and division,
+and multiplication and division is always performed before addition and subtraction,
+`!` negation is always performed before `&` (logical AND), and `&` is performed before `|` (logical OR).
+
+Brackets should be used where necessary to ensure that logical,
+comparison and arithmetic operations are performed in the order which you intend.
+
+In the example above, the brackets are not actually needed,
+although they do no harm and help clarify our intention that we want female patients taller than 170 cm,
+or patients of any sex who live in postcode 2119.
+
+However, the following two examples are not equivalent, as you can see from the results returned.
+Ensure that you understand why the results are different.
+
+```{r data-frames-example-20, exercise=TRUE, exercise.setup="data-frames-examples-set-up-d"}
+h <- patients_df[(patients_df$sex == "F" | patients_df$height_in_cm > 170) & patients_df$postcode == "2119",]
+h
+```
+
+```{r data-frames-example-21, exercise=TRUE, exercise.setup="data-frames-examples-set-up-d"}
+i <- patients_df[patients_df$sex == "F" | patients_df$height_in_cm > 170 & patients_df$postcode == "2119",]
+i
+```
+
+The first expression returns patients who are 'female patients taller than 170 cm or patients of any sex who live in postcode 2119'.
+The second expression returns patients who are 'female patients or patients taller than 170 cm who live in postcode 2119'.
+
+## Activity: subsetting data frames
+
+In the code cell below, first create the `patients_df` data frame using this code:
+
+```
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          sex=c("F", "F", "M", "F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+```
+
+Then add R code to:
+
+  * calculate a set of Tukey's 'five numbers' summary statistics for each of the age, height and weight columns using the `fivenum()` function (read the manual page for `fivenum()` to find out what the five numbers are)
+    * hint: search for 'fivenum' in the Help pane in RStudio
+  * re-calculate those summary statistics for just the females
+  * add a column to the data frame containing the calculated BMI (body mass index) (the formula for BMI is weight (in kilograms) divided by the height (in metres) squared
+  
+$$\textrm{BMI} \leftarrow \frac{\textrm{weight}}{\textrm{height} ^ 2}$$
+
+Note that the height in the `patients_df` data frame is in centimetres, and the weight is in kilograms.
+  
+```{r data-frames-exercise-1, exercise=TRUE}
+
+
+```
+
+```{r data-frames-exercise-1-hint-1}
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          sex=c("F", "F", "M", "F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+
+print("Tukey's five numbers for the age column:")
+fivenum(patients_df[,"age"])
+
+print("Tukey's five numbers for the height column:")
+fivenum(patients_df[,"height"])
+
+print("Tukey's five numbers for the weight column:")
+fivenum(patients_df$weight) # referencing the weight column using the $ operator as an alternative
+```
+
+```{r data-frames-exercise-1-hint-2}
+print("Tukey's five numbers for the age column for females:")
+fivenum(patients_df[patients_df$sex == "F","age"])
+
+print("Tukey's five numbers for the height column for females:")
+fivenum(patients_df[patients_df$sex == "F","height"])
+
+print("Tukey's five numbers for the weight column for females:")
+# referencing the weight column using the $ operator as an alternative
+fivenum(patients_df[patients_df$sex == "F",]$weight) 
+```
+
+```{r data-frames-exercise-1-hint-3}
+patients_df$bmi <- patients_df$weight / (patients_df$height/100)^2
+patients_df
+```
+
+## Attaching data frames and _with()_
+
+In the code above where we were creating a subset of a data frame in `i`,
+we needed to prefix each of the column names in the `patients_df` data frame with the name of the data frame itself,
+so R could find the column.
+This can be tedious to type and makes the code more difficult to read.
+
+Instead, we can _attach_ the `patients_df` data frame to the local scope (the collection of names R can 'see' as variable names),
+as shown in the code that follows.
+
+Note also the use of the `identical()` function to test whether the subsetted data frames `i` and `j` are the same,
+and that we _detach_ the `patients_df` data frame from the search path as soon as we have finished with it.
+
+Detaching data frames as soon as direct reference to their column or element names is no longer need is good practice
+and helps avoid confusion and mistakes,
+such as when two different data frames have a column with the same name, and both are attached to the search path.
+(R will only find one of them and it may not be the one you are expecting.)
+
+```{r data-frames-examples-set-up-e}
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          gender=c("F", "F", "M", "F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+rownames(patients_df) <- c("Wilma", "Betty", "Fred", "Pebbles")
+colnames(patients_df)[4] <- "height_in_cm"
+patients_df[,"postcode"] <- c("2202", "3405", "2022", "2119")
+i <- patients_df[patients_df$gender == "F" | patients_df$height_in_cm > 170 & patients_df$postcode == "2119",]
+```
+
+```{r data-frames-example-22, exercise=TRUE, exercise.setup="data-frames-examples-set-up-e"}
+attach(patients_df)
+
+j <- patients_df[gender == "F" | height_in_cm > 170 & postcode == "2119",]
+
+j
+
+identical(i, j)
+
+detach(patients_df)
+```
+
+### The _with()_ function
+
+As an alternative to attaching and detaching data frames, the `with()` function can be used.
+
+This effectively attaches a data frame, but only within the context of the `with()` function.
+
+Thus the follow is also equivalent to the code above:
+
+```{r data-frames-example-23, exercise=TRUE, exercise.setup="data-frames-examples-set-up-e"}
+k <- with(patients_df, patients_df[gender == "F" | height_in_cm > 170 & postcode == "2119",])
+k
+identical(i, k)
+```
+
+Multiple statements can be nested inside the context of the `with()` function by using curly braces.
+The resulting value of the `with()` is the value of the last line of the block of code
+
+```{r data-frames-example-23a, exercise=TRUE, exercise.setup="data-frames-examples-set-up-e"}
+n <- with(patients_df, {
+  k <- patients_df[gender == "F" | height_in_cm > 170 & postcode == "2119",]
+  nrow(k)
+})
+n
+```
+
+Variables created inside the block of code are not available outside the block.
+
+```{r data-frames-example-23b, exercise=TRUE, exercise.setup="data-frames-examples-set-up-e"}
+n <- with(patients_df, {
+  k <- patients_df[gender == "F" | height_in_cm > 170 & postcode == "2119",]
+  nrow(k)
+})
+k
+```
+
+Any changes made to their value are purely local to the block of code.
+
+```{r data-frames-example-23c, exercise=TRUE, exercise.setup="data-frames-examples-set-up-e"}
+k = "hello"
+n <- with(patients_df, {
+  k <- patients_df[gender == "F" | height_in_cm > 170 & postcode == "2119",]
+  nrow(k)
+})
+k
+```
+
+## Combining data frames
+
+Like matrices, data frames can be combined row-wise or column-wise using the `rbind()` and `cbind()` functions respectively:
+
+```{r data-frames-example-24, exercise=TRUE, exercise.setup="data-frames-examples-set-up-e"}
+# remind ourselves of the contents of patients_df
+patients_df
+```
+
+```{r data-frames-example-25, exercise=TRUE, exercise.setup="data-frames-examples-set-up-e"}
+# create an additional patients data frame
+more_patients_df <- data.frame(id=c(897, 866, 35),
+                          gender=c("F", "M", "F"),
+                          age=c(27, 17, 56),
+                          height_in_cm=c(147, 193, 174),
+                          weight=c(53.7, 75.6, 93.3),
+                          postcode=c(2119, 2121, 2071))
+more_patients_df
+```
+
+```{r data-frames-examples-set-up-f}
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          gender=c("F", "F", "M", "F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+rownames(patients_df) <- c("Wilma", "Betty", "Fred", "Pebbles")
+colnames(patients_df)[4] <- "height_in_cm"
+patients_df[,"postcode"] <- c("2202", "3405", "2022", "2119")
+more_patients_df <- data.frame(id=c(897, 866, 35),
+                          gender=c("F", "M", "F"),
+                          age=c(27, 17, 56),
+                          height_in_cm=c(147, 193, 174),
+                          weight=c(53.7, 75.6, 93.3),
+                          postcode=c(2119, 2121, 2071))
+```
+
+```{r data-frames-example-26, exercise=TRUE, exercise.setup="data-frames-examples-set-up-f"}
+# combine row-wise
+all_patients_df <- rbind(patients_df, more_patients_df)
+all_patients_df
+```
+
+```{r data-frames-example-27, exercise=TRUE, exercise.setup="data-frames-examples-set-up-f"}
+# create some additional columns for the all_patients_df data frame
+all_patients_additional_columns <- data.frame(
+                          systolic_bp=c(123, 145, 90, 162, 150, 115, 110),
+                          diastolic_bp=c(85, 90, 60, 75, 100, 70, 50))
+all_patients_additional_columns
+```
+
+```{r data-frames-examples-set-up-g}
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          gender=c("F", "F", "M", "F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+rownames(patients_df) <- c("Wilma", "Betty", "Fred", "Pebbles")
+colnames(patients_df)[4] <- "height_in_cm"
+patients_df[,"postcode"] <- c("2202", "3405", "2022", "2119")
+more_patients_df <- data.frame(id=c(897, 866, 35),
+                          gender=c("F", "M", "F"),
+                          age=c(27, 17, 56),
+                          height_in_cm=c(147, 193, 174),
+                          weight=c(53.7, 75.6, 93.3),
+                          postcode=c(2119, 2121, 2071))
+all_patients_df <- rbind(patients_df, more_patients_df)
+all_patients_additional_columns <- data.frame(
+                          systolic_bp=c(123, 145, 90, 162, 150, 115, 110),
+                          diastolic_bp=c(85, 90, 60, 75, 100, 70, 50))
+```
+
+```{r data-frames-example-28, exercise=TRUE, exercise.setup="data-frames-examples-set-up-g"}
+# combine column-wise
+all_patients_df_with_bp <- cbind(all_patients_df, all_patients_additional_columns)
+all_patients_df_with_bp
+```
+
+Of course,
+combining data column-wise in this fashion presumes that the rows of data in the data frames being combined are in the correct order.
+This is not always the case.
+
+Often our data frames contain a unique key column that identifies records belonging to the same individual or entity.
+
+When this id is shared between different data frames
+it is possible to join or merge data frames on the basis of the unique key column
+to identify records belonging to the same individual or entity in the data frames being merged.
+
+Examine this example:
+
+```{r data-frames-examples-set-up-h}
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          gender=c("F", "F", "M", "F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+rownames(patients_df) <- c("Wilma", "Betty", "Fred", "Pebbles")
+colnames(patients_df)[4] <- "height_in_cm"
+patients_df[,"postcode"] <- c("2202", "3405", "2022", "2119")
+more_patients_df <- data.frame(id=c(897, 866, 35),
+                          gender=c("F", "M", "F"),
+                          age=c(27, 17, 56),
+                          height_in_cm=c(147, 193, 174),
+                          weight=c(53.7, 75.6, 93.3),
+                          postcode=c(2119, 2121, 2071))
+all_patients_df <- rbind(patients_df, more_patients_df)
+all_patients_additional_columns <- data.frame(
+                          systolic_bp=c(123, 145, 90, 162, 150, 115, 110),
+                          diastolic_bp=c(85, 90, 60, 75, 100, 70, 50))
+all_patients_df_with_bp <- cbind(all_patients_df, all_patients_additional_columns)
+```
+
+```{r data-frames-example-29, exercise=TRUE, exercise.setup="data-frames-examples-set-up-h"}
+pulse_rates <- data.frame(
+                          id=c(866, 123, 897, 35, 876),
+                          pulse_rate=c(72, 91, 62, 77, 103))
+pulse_rates
+
+# merge by id column value
+merged_patients_df <- merge(all_patients_df_with_bp, pulse_rates, by="id", all=TRUE)
+merged_patients_df
+```
+
+Even though the rows are in a different order in the two data frames,
+the `id` column lets us match up rows corresponding to the same individual.
+Where a `pulse_rate` is not available a value of `NA` has been added by the merge.
+
+## Activity: merging data frames
+
+Write R code to create a new data frame with an `id` column containing ID numbers
+that match some of the ID numbers in the `patients_df` data frame you created previously.
+The new data frame should also contain at least one other column,
+containing data about some other characteristic of some of the patients.
+However, your new data frame should have fewer rows than the `patients_df` data frame.
+That is, it should not contain data for all the patients in `patients_df`, only for some of them.
+It will have fewer rows.
+
+Use the `merge()` function to merge (join) your new data frame to the `patients_df` data frame,
+and print the resulting data frame.
+
+We have pre-populated the code cell below with code that creates the `patients_df` data frame. Add your code after that.
+
+```{r data-frames-exercise-2, exercise=TRUE}
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          gender=c("F", "F", "M", "F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+
+
+```
+
+```{r data-frames-exercise-2-solution}
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          gender=c("F", "F", "M", "F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+
+shoe_sizes <- data.frame(id=c(876, 263),
+                         shoe_size=c(11,9))
+
+patients_df2 <- merge(patients_df, shoe_sizes, by='id', all=TRUE)
+patients_df2
+```
+
+## Sorting data frames
+
+Recall that we used the `order()` function, which returns a sorted index vector, to create a sorted version of a data vector.
+
+We can also use it to create sorted versions of a data frame.
+Let's sort our `merged_patients_df` data frame by age:
+
+```{r data-frames-examples-set-up-i}
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          gender=c("F", "F", "M", "F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+rownames(patients_df) <- c("Wilma", "Betty", "Fred", "Pebbles")
+colnames(patients_df)[4] <- "height_in_cm"
+patients_df[,"postcode"] <- c("2202", "3405", "2022", "2119")
+more_patients_df <- data.frame(id=c(897, 866, 35),
+                          gender=c("F", "M", "F"),
+                          age=c(27, 17, 56),
+                          height_in_cm=c(147, 193, 174),
+                          weight=c(53.7, 75.6, 93.3),
+                          postcode=c(2119, 2121, 2071))
+all_patients_df <- rbind(patients_df, more_patients_df)
+all_patients_additional_columns <- data.frame(
+                          systolic_bp=c(123, 145, 90, 162, 150, 115, 110),
+                          diastolic_bp=c(85, 90, 60, 75, 100, 70, 50))
+all_patients_df_with_bp <- cbind(all_patients_df, all_patients_additional_columns)
+pulse_rates <- data.frame(
+                          id=c(866, 123, 897, 35, 876),
+                          pulse_rate=c(72, 91, 62, 77, 103))
+merged_patients_df <- merge(all_patients_df_with_bp, pulse_rates, by="id", all=TRUE)
+```
+
+```{r data-frames-example-30, exercise=TRUE, exercise.setup="data-frames-examples-set-up-i"}
+t <- merged_patients_df[order(merged_patients_df$age),]
+t
+```
+
+We can sort by two or more columns if required.
+Note the use of `with()` here to avoid having to type the name of the data frame repeatedly to identify the column names.
+
+```{r data-frames-example-31, exercise=TRUE, exercise.setup="data-frames-examples-set-up-i"}
+s <- with(merged_patients_df, merged_patients_df[order(gender, height_in_cm),])
+s
+```
+
+## Reading data into data frames
+
+So far we have constructed data frames 'manually' in code.
+But of course R can load or import existing data from a wide variety of sources and formats,
+including reading data directly from databases,
+from file formats used by other statistics and analysis software such as the SAS System, SPSS, Stata, Minitab,
+and even directly from Microsoft Excel,
+as well as directly from resources on the internet.
+
+However, perhaps the most common way of getting external data into R is by importing a CSV (comma separated value) file.
+The CSV file format is very commonly used to exchange or share data between different systems or programs.
+
+Creating a data frame from a CSV file is very easy, using the `read.csv()` function. 
+
+Here we will read a CSV file directly from a web server on the internet,
+but of course you can also read CSV files that are stored in your computer's local file system
+_e.g._ on the hard disc or a network drive.
+
+```{r read-csv-example-1, exercise=TRUE, exercise.timelimit=3600}
+acifile = "https://data.gov.au/dataset/05696f6f-6ff5-42a2-904f-af5e4d1f56f8/resource/7fbac314-4bf9-4601-b812-0307316ef5a4/download/acimcombinedcounts.csv"
+aci <- read.csv(acifile)
+
+# if direct internet download fails, comment out the lines above and
+# then uncomment the following two lines and re-run
+# acifile <- system.file("extdata", "acimcombinedcounts.csv", package="cbdrh.rintro")
+# aci <- read.csv(acifile))
+
+str(aci)
+```
+
+```{r read-csv-example-set-up-a}
+acifile = "https://data.gov.au/dataset/05696f6f-6ff5-42a2-904f-af5e4d1f56f8/resource/7fbac314-4bf9-4601-b812-0307316ef5a4/download/acimcombinedcounts.csv"
+aci <- read.csv(acifile)
+if (nrow(aci) != 9240) {
+  acifile <- system.file("extdata", "acimcombinedcounts.csv", package="cbdrh.rintro")
+  aci <- read.csv(acifile)  
+}  
+#save(aci, file=path.expand("~/intro-to-R/aci.Rda"))
+```
+
+
+```{r read-csv-example-2, exercise=TRUE, exercise.setup="read-csv-example-set-up-a"}
+nrow(aci) # returns number of rows in a data frame
+
+colnames(aci) # column names
+
+# examine the first few rows of the data frame from 1982 onwards
+# note the use of the head() function for this
+head(aci[aci$Year >= 1982,])
+
+# examine the last few rows for lung cancer
+# note the use of the tail function
+tail(aci[aci$Year >= 1982 & aci$Cancer_Type == "Lung cancer",])
+```
+
+Notice that by default, the `read.csv()` function will automatically convert character columns into factors.
+There is an argument to stop this if you wish,
+because not all character columns are categorical,
+_e.g._ if they contain, say, a free text comment.
+
+
+```{r read-csv-example-7, exercise=TRUE, exercise.setup="read-csv-example-set-up-a"}
+aci2 <- read.csv(acifile,
+                 stringsAsFactors=FALSE)
+
+class(aci2$Sex)
+```
+
+## Activity: reading CSV files
+
+Find a CSV file that is freely available on the internet, or on your computer,
+and read it into an R data frame using the `read.csv()` function.
+The CSV file will need to be directly accessible at a URL, without the need to enter a password
+(R can download files from password-protected websites and even negotiate complex web page interfaces,
+but exploring those capabilities is beyond the scope of this tutorial).
+
+There are a large number of suitable CSV files available via the NSW government Open Data website
+at https://data.nsw.gov.au/data/dataset but feel free to use other sites.
+
+Use the `str()` function to show the structure of the data frame you create,
+and the `head()` and `tail()` functions to show the top and bottom rows of the data frame.
+
+```{r read-csv-exercise-1, exercise=TRUE}
+
+
+```
+
+
+```{r read-csv-exercise-1-solution}
+nsw_schools <- read.csv("https://data.cese.nsw.gov.au/data/dataset/027493b2-33ad-3f5b-8ed9-37cdca2b8650/resource/2ac19870-44f6-443d-a0c3-4c867f04c305/download/collections.csv")
+
+str(nsw_schools)
+
+head(nsw_schools)
+
+tail(nsw_schools)
+```
+
+## Summary
+
+This concludes section 4 and our overview of data frames (and the factor data type).
+
+In section 5 we will look at writing functions in R.
+

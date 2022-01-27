@@ -1,0 +1,624 @@
+---
+title: "Introduction to R: section 3"
+tutorial:
+  id: "au.edu.unsw.cbdrh.intro_to_R.section3"
+  version: 0.1
+output: 
+  learnr::tutorial:
+    progressive: false
+    allow_skip: true
+    css: css/intro.css
+runtime: shiny_prerendered
+description: "Section 3: Matrices and lists"
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+tutorial_options(exercise.completion = FALSE, exercise.diagnostics = FALSE)
+```
+
+![](images/UNSW_2017_Big Data_landscape.jpg){width="75%"}
+
+## Overview
+
+This tutorial is broken into six sections.
+
+In sections 1 and 2 we looked at some of the basics types and operators R provides.
+We also looked at the vector, a very important basic R data type.
+
+This section deals with some less common data types used in R:
+
+ * Matrices
+ * Matrix arithmetic
+ * Lists
+
+This section may be done after section 4 the first time through this tutorial if desired.
+
+<span class="copyright">© Copyright 2018 UNSW Sydney. All rights reserved except where otherwise stated.</span>
+
+## Matrices in R
+
+Matrices (matrixes) in R are similar to vectors in that they can contain elements of only one data type.
+Unlike vectors they have two dimensions, not just one.
+
+In fact, a matrix in R is actually just a vector onto which an additional dimension has been imposed.
+This can be seen from the way matrices are created using the `matrix()` function.
+
+Arrays in R are similar to matrices, but they have more than two dimensions.
+
+The distinction is made between matrices and arrays because two-dimensional matrices are the foundation of linear algebra,
+which is extensively used in statistics and statistical computation.
+R provides a rich variety of functions that efficiently implement linear algebra operations, that only work on objects of the 'matrix' class.
+
+To create a matrix in R, you can use the `matrix()` function thus:
+
+```{r matrices-exercise-1, exercise=TRUE}
+a <- matrix(c(2, 4, 3, 1, 5, 7), # the data elements 
+            nrow=2,              # number of rows 
+            ncol=3)              # number of columns 
+
+a
+class(a)
+```
+
+Notice that the matrix is filled column-wise:
+the first two values are used to fill the first column, the next two values are used to fill the second column, and so on.
+
+Matrices can be created row-wise by using the `byrow` argument to the `matrix()` function:
+
+```{r matrices-exercise-2, exercise=TRUE}
+b <- matrix(c(2, 4, 3, 1, 5, 7), # the data elements 
+            nrow=2,              # number of rows 
+            ncol=3,              # number of columns 
+            byrow=TRUE)          # fill the matrix row-wise
+
+b
+```
+
+Note that each row and column in a matrix (and higher dimensions in an array) can be given a name.
+If a source data vector is provided it is not necessary to specify both the number of rows and the number of columns
+since one can be inferred from the other (because the length of the source vector gives the total number of cells in the matrix or array):
+
+```{r matrices-exercise-3, exercise=TRUE}
+c <- matrix(c(2, 4, 3, 1, 5, 7), 
+            nrow = 2,
+            dimnames = list(
+                c("row one", "row two"),
+                c("col one", "col two", "col three")
+            ))
+
+c
+```
+
+```{r matrices-exercises-set-up-d}
+c <- matrix(c(2, 4, 3, 1, 5, 7), 
+            nrow = 2,
+            dimnames = list(
+                c("row one", "row two"),
+                c("col one", "col two", "col three")
+            ))
+```
+
+You can also use the `rownames()` and `colnames()` functions to get or set the row and column names of a matrix object:
+
+```{r matrices-exercise-4, exercise=TRUE, exercise.setup="matrices-exercises-set-up-d"}
+rownames(c)
+colnames(c)
+```
+
+The `dim()` function will return the dimensions of the matrix.
+It can also be used to set, or impose matrix dimensions on a vector (by specifying the number of rows then columns):
+
+```{r matrices-exercise-5, exercise=TRUE}
+# create b as a vector
+b <- c(2, 4, 3, 1, 5, 7)
+dim(b)
+# turn the vector into a matrix
+dim(b) <- c(2, 3)
+dim(b)
+
+b
+
+class(b)
+```
+
+Note that the `dim()` function can also be used to reshape an existing matrix.
+When using `dim()` to do this any row and column names are lost:
+
+```{r matrices-exercises-set-up-a}
+a <- matrix(c(2, 4, 3, 1, 5, 7), # the data elements 
+            nrow=2,              # number of rows 
+            ncol=3)              # number of columns 
+```
+
+```{r matrices-exercises-set-up-c}
+c <- matrix(c(2, 4, 3, 1, 5, 7), 
+            nrow = 2,
+            dimnames = list(
+                c("row one", "row two"),
+                c("col one", "col two", "col three")
+            ))
+```
+
+```{r matrices-exercise-6, exercise=TRUE, exercise.setup="matrices-exercises-set-up-a"}
+dim(a)
+a
+
+dim(a) <- c(3,2)
+a
+```
+
+The `length()` function, which returns the number of elements in a vector, also works with matrices and arrays,
+where it returns the product of all the dimensions, that is, the total number of data elements (cells) in the matrix or array:
+
+```{r matrices-exercise-7, exercise=TRUE, exercise.setup="matrices-exercises-set-up-a"}
+a
+length(a)
+```
+
+Elements of a matrix can be accessed, and their values set, using `[]` square bracket operators, just like vectors,
+but with two dimensions of indices, separated by a comma.
+
+Rows come first, then columns:
+
+```{r matrices-exercise-8a, exercise=TRUE, exercise.setup="matrices-exercises-set-up-a"}
+a
+a[1, 1]
+a[2, 3]
+```
+
+
+If you want, say, all the rows in a matrix but only some columns, just leave the rows parameter to the `[ ]` operator blank:
+
+```{r matrices-exercise-9, exercise=TRUE, exercise.setup="matrices-exercises-set-up-a"}
+# matrix a looks like this
+a
+
+# all rows but only column 2 of matrix a
+a[,2]
+
+# all columns but only row 2 of matrix a
+a[2,]
+```
+
+Notice that the result is no longer a matrix, it's a vector, because there is only one column or one row returned.
+
+```{r matrices-exercise-10, exercise=TRUE, exercise.setup="matrices-exercises-set-up-a"}
+class(a[,2])
+class(a[2,])
+```
+
+The comma `,` is important when addressing a matrix.
+Because a matrix is a vector under the hood not using a `,` means selecting the nth element of the matrix running down the columns in turn.
+
+```{r matrices-exercise-10a, exercise=TRUE, exercise.setup="matrices-exercises-set-up-a"}
+a
+a[1]
+a[2]
+a[3]
+```
+
+Let's reshape matrix `a` and try subsetting again, but requesting two columns:
+
+```{r matrices-exercise-11, exercise=TRUE, exercise.setup="matrices-exercises-set-up-a"}
+dim(a) <- c(2,3)
+a
+
+# all rows but only columns 1 and 3 of matrix a
+a[,c(1,3)]
+
+# notice that the result is now still a matrix, because there is more than one column and more than one row
+class(a[,c(1,3)])
+```
+
+Negative indices can also be used with matrices and arrays.
+This has the same effect as when subsetting a vector, the given rows/columns are excluded.
+It also has the same restriction: positive and negative indices may not be mixed.
+
+```{r matrices-exercise-12, exercise=TRUE, exercise.setup="matrices-exercises-set-up-a"}
+a[,-2]
+```
+
+Subsetting matrices and arrays by element name also works as expected:
+
+```{r matrices-exercise-13, exercise=TRUE, exercise.setup="matrices-exercises-set-up-c"}
+c
+
+c["row two", "col three"]
+```
+
+Assignment to elements in a matrix or array is analogous to assignment to elements of a vector:
+
+```{r matrices-exercise-14, exercise=TRUE, exercise.setup="matrices-exercises-set-up-c"}
+c[2, 2] <- NA
+
+c
+```
+
+Matrices can be combined, row-wise or column-wise, using the `rbind()` and `cbind()` functions:
+
+```{r matrices-exercise-15, exercise=FALSE, echo=TRUE}
+a <- matrix(c(2, 4, 3, 1, 5, 7), # the data elements 
+            nrow=2,              # number of rows 
+            ncol=3)              # number of columns 
+
+b <- matrix(c(12, 14, 13, 11, 15, 17),  # the data elements 
+            nrow=2,                     # number of rows 
+            ncol=3)                     # number of columns 
+a
+b
+```
+
+```{r matrices-exercise-binding-set-up}
+a <- matrix(c(2, 4, 3, 1, 5, 7), # the data elements 
+            nrow=2,              # number of rows 
+            ncol=3)              # number of columns 
+b <- matrix(c(12, 14, 13, 11, 15, 17),   # the data elements 
+            nrow=2,              # number of rows 
+            ncol=3)              # number of columns 
+```
+
+```{r matrices-exercise-17, exercise=TRUE, exercise.setup="matrices-exercise-binding-set-up"}
+# join rows together
+rbind(a, b)
+```
+
+```{r matrices-exercise-18, exercise=TRUE, exercise.setup="matrices-exercise-binding-set-up"}
+# join columns together
+cbind(a, b)
+```
+
+## Visualising matrices
+
+Matrices can readily be visualised in R using the `image()` function.
+First, let's create a matrix consisting of just ones and zeros, drawing the shape of a T with the zeros:
+
+```{r visualising-matrices-set-up}
+mat <- matrix(c(0,0,0,1,0,1,1,0,1), nrow=3, byrow=TRUE)
+```
+
+```{r visualising-matrices-exercise-1, exercise=FALSE, echo=TRUE}
+mat <- matrix(c(0,0,0,1,0,1,1,0,1), nrow=3, byrow=TRUE)
+
+mat
+```
+
+Now let's visualise that using `image()`.
+The `image()` function chooses colours for us automatically (although the colours can be overridden, of course).
+
+```{r visualising-matrices-exercise-2, exercise=TRUE, exercise.setup="visualising-matrices-set-up"}
+image(mat)
+```
+
+Well, it draws a T, but rotated through 90 degrees.
+For some obscure reason, the `image()` function draws matrices in a rotated fashion.
+Never mind, we can just define a function to rotate our matrix before visualising it
+(we can define our own functions in R as we will see later in section 5):
+
+```{r visualising-matrices-exercise-3, exercise=TRUE, exercise.setup="visualising-matrices-set-up"}
+rotate <- function(x) t(apply(x, 2, rev))
+    
+image(rotate(mat))
+```
+
+Here we see a visualisation of a matrix called `volcano` (this matrix is built-in to R as an example),
+the cells of which contain the heights of a volcano at grid references:
+
+```{r visualising-matrices-exercise-4, exercise=FALSE, echo=TRUE}
+class(volcano)
+head(volcano)
+```
+
+Note that the `head()` functions shows us the first 6 rows of an object (`tail()` shows the last 6 rows).
+Because there are more columns than will fit across the screen, the output ends up wrapped onto multiple lines.
+Helpfully, R repeats the row and column indices each time the output is wrapped.
+
+Let's visualise it:
+
+```{r visualising-matrices-exercise-5, exercise=TRUE}
+image(volcano)
+```
+
+...or to put that in perspective, using the `persp()` function:
+
+```{r visualising-matrices-exercise-6, exercise=TRUE}
+persp(volcano)
+```
+
+## Matrix arithmetic
+
+The standard arithmetic operators, `+`, `-`, `*` and `/`, all work element-wise on matrices, just as they do with vectors.
+
+The operators `+` and `-` are probably what are wanted when adding and subtracting matrices because
+they add and subtract the elements of the matrices element-wise.
+
+Note that when performing this type of arithmetic on two matrices, they must be 'conformable',
+_i.e._ the matrices must each be exactly the same size and shape, or you won't get the results you expect.
+
+But **`*` is not matrix multiplication** but element-wise multiplication of individual entries and that's
+not what is conventionally meant when writing an expression like `A * B` when `A` and `B` are matrices.
+This can be a source of error and confusion.
+
+Recall that we have defined two matrices, `a` and `b`:
+
+```{r matrix-arithmetic-exercise-1, exercise=FALSE, echo=TRUE, exercise.setup="matrices-exercise-binding-set-up"}
+a
+
+b
+```
+
+Now write R code to print the sum of `a` and `b`:
+
+```{r matrix-arithmetic-exercise-2, exercise=TRUE, exercise.setup="matrices-exercise-binding-set-up"}
+
+```
+
+```{r matrix-arithmetic-exercise-2-hint}
+a + b
+```
+
+Now write R code to print the difference of `a` and `b` (`a` minus `b`):
+
+```{r matrix-arithmetic-exercise-3, exercise=TRUE, exercise.setup="matrices-exercise-binding-set-up"}
+
+```
+
+### Scalar multiplication
+
+Note that because these operations are element-wise the basic multiplication (`*`), division (`/`)
+and exponentiation (`^` and `**`) operators are **not** matrix operations.
+
+The expression `a * b` multiplies the elements of `a` and `b` element-wise and does **not** perform matrix multiplication.
+
+$$\left(\matrix{24 & 39 & 75 \\ 56 & 11 & 119}\right) \leftarrow \left(\matrix{2 & 3 & 5 \\ 4 & 1 & 7}\right) * \left(\matrix{12 & 13 & 15 \\ 14 & 11 & 17}\right)$$
+
+```{r matrix-arithmetic-exercise-4, exercise=FALSE, echo=TRUE, exercise.setup="matrices-exercise-binding-set-up"}
+a
+b
+a * b
+```
+
+This means that these operations are usually only useful with singleton vectors to effect scalar multiplication and division, &c.
+
+$$\left(\matrix{6 & 9 & 15 \\ 12 & 3 & 21}\right) \leftarrow \left(\matrix{2 & 3 & 5 \\ 4 & 1 & 7}\right) * 3$$
+
+$$\left(\matrix{0.6666667 & 1.0000000 & 1.666667 \\ 1.3333333 & 0.3333333 & 2.333333}\right) \leftarrow \left(\matrix{2 & 3 & 5 \\ 4 & 1 & 7}\right) / \; 3$$
+
+$$\left(\matrix{4 & 9 & 25 \\ 16 & 1 & 49}\right) \leftarrow \left(\matrix{2 & 3 & 5 \\ 4 & 1 & 7}\right) \wedge 2$$
+
+So vector recycling means that arithmetic involving a matrix and a single vector works as expected.
+
+```{r matrix-arithmetic-exercise-6, exercise=TRUE, exercise.setup="matrices-exercise-binding-set-up"}
+# remind ourselves what is in matrix a
+a
+
+# multiply a by 2
+a * 3
+
+# divide a by 3
+a / 3
+
+# square each element of a
+a ^ 2
+```
+
+Recycling does however mean that arithmetic involving a matrix and a vector with more than one element may not work as expected.
+When the two matrices are not conformable, _i.e._ not the same size and shape, the result may be very much not what is expected.
+
+```{r matrix-arithmetic-exercise-6a, exercise=FALSE, echo=TRUE, exercise.setup="matrices-exercise-binding-set-up"}
+a * c(1, 2, 3)
+```
+
+Remember that a matrix is stored columm-wise going down the rows so this is what is happening.
+
+$$\left(\matrix{2 & 9 & 10 \\ 8 & 1 & 21}\right) \leftarrow \left(\matrix{2 \times 1 & 3 \times 3 & 5 \times 2 \\ 4 \times 2 & 1 \times 1 & 7 \times 3}\right) \leftarrow  \left(\matrix{2 & 3 & 5 \\ 4 & 1 & 7}\right) * \left(\matrix{1 & 2 & 3}\right)$$
+
+Which is usually not what was intended.
+
+### Matrix multiplication
+
+Matrix arithmetic (in the mathematical sense) is performed using the special operators `%*%` for inner matrix multiplication,
+and `%o%` for outer matrix multiplication (or the `inner()` and `outer()` functions, which are equivalent).
+
+For matrix multiplication, the number of rows in the first matrix must be the same as the number of columns in the second matrix.
+
+Matrix inversion is performed using the `solve()` function, and matrix transposition using `t()`:
+
+```{r matrix-arithmetic-exercise-7, exercise=TRUE, exercise.setup="matrices-exercise-binding-set-up"}
+a
+
+t(a)
+```
+
+### Logical operations on matrices
+
+Comparisons and logical operations also work with matrices, just as they do with vectors:
+
+```{r matrix-arithmetic-exercise-8, exercise=FALSE, echo=TRUE}
+d <- matrix(9:17, nrow=3)
+d
+```
+
+```{r matrix-arithmetic-exercise-8-set-up}
+d <- matrix(9:17, nrow=3)
+```
+
+```{r matrix-arithmetic-exercise-9, exercise=TRUE, exercise.setup="matrix-arithmetic-exercise-8-set-up"}
+# a logical matrix created with a conditional expression
+d > 12
+```
+
+```{r matrix-arithmetic-exercise-10, exercise=TRUE, exercise.setup="matrix-arithmetic-exercise-8-set-up"}
+# replace all values in d which are greater than 12 with NA
+d[d > 12] <- NA
+d
+```
+
+Matrices have their uses but they have the same restriction as vectors in that all elements have to be of the same type.
+This usually limits their use to purely mathematical applications.
+For managing and manipulating tabular data we will be looking at another data type, the _data frame_.
+
+## Lists
+
+So far we have covered vectors, matrices (and mentioned arrays).
+These data structures are very useful, but they all have one limitation: they can only handle one data type.
+You cannot, for example, store a mixture of, say, character strings and floating-point (real) numbers in a single vector or matrix.
+
+The list data structure in R addresses this issue.
+It permits objects of different data types or classes to be stored in a single list object, and referenced by index position or name.
+
+Let's create several vectors, each of a different data type, and a matrix, and add them all to a list object using the `list()` function:
+
+```{r lists-exercises-set-up}
+i <- c(2L, 3L, 5L)
+n <- c(3.56, 2.9736435, 19.8)
+c <- c("aa", "bb", "cc", "dd", "ee") 
+b <- c(TRUE, FALSE, TRUE, FALSE, FALSE) 
+m <- matrix(c(2, 4, 3, 1, 5, 7), nrow=3)
+x <- list(i, n, c, b, m)  
+```
+
+```{r lists-exercise-1, exercise=FALSE, echo=TRUE}
+i <- c(2L, 3L, 5L)
+n <- c(3.56, 2.9736435, 19.8)
+c <- c("aa", "bb", "cc", "dd", "ee") 
+b <- c(TRUE, FALSE, TRUE, FALSE, FALSE) 
+m <- matrix(c(2, 4, 3, 1, 5, 7), nrow=3)
+
+# add them all to a list 
+x <- list(i, n, c, b, m)  
+
+x
+```
+
+Notice that the list object `x` contains 5 elements, with the index for (position of) each element shown in double square brackets `[[ ]]`.
+
+Each element in the list is itself an object, each one of a different data type or class.
+We can use single square brackets to subset the elements of a list.
+
+Note that this returns a list:
+
+```{r lists-exercise-2, exercise=TRUE, exercise.setup="lists-exercises-set-up"}
+x[3]
+class(x[3])
+```
+
+If we wish to access the objects contained in a list directly, the double square bracket operator is used.
+The following returns the 3rd element of the list `x` by itself,
+rather than returning a list containing the 3rd element as the single square bracket operator would do:
+
+```{r lists-exercise-3, exercise=TRUE, exercise.setup="lists-exercises-set-up"}
+x[[3]]
+class(x[[3]])
+```
+
+One can also insert or even modify elements of a list directly (in place) in the list that contains them,
+using the `[[ ]]` operator and the `[ ]` operator.
+Here we are updating the second value of a vector which is contained in the third element of the list x:
+
+```{r lists-exercise-4, exercise=TRUE, exercise.setup="lists-exercises-set-up"}
+x[[3]] # before
+
+x[[3]][2] <- "BB"
+
+x[[3]] # after
+```
+
+Elements in a list may also be named and referenced by name.
+Let's reconstruct the list `x`, this time assigning names to each element. Note the syntax used:
+
+```{r lists-exercise-5, exercise=TRUE, exercise.setup="lists-exercises-set-up"}
+x <- list(integers=i, real_numbers=n, character_strings=c, logicals=b, "The Matrix"=m) 
+
+x
+```
+
+Notice that named list elements are printed with a $ prefix, and the $ operator can also be used to access them:
+
+```{r lists-exercise-6, exercise=TRUE, exercise.setup="lists-exercise-6-set-up"}
+x$character_strings
+
+x$logicals
+
+x$"The Matrix"
+```
+
+```{r lists-exercise-6-set-up}
+i <- c(2L, 3L, 5L)
+n <- c(3.56, 2.9736435, 19.8)
+c <- c("aa", "bb", "cc", "dd", "ee") 
+b <- c(TRUE, FALSE, TRUE, FALSE, FALSE) 
+m <- matrix(c(2, 4, 3, 1, 5, 7), nrow=3)
+x <- list(integers=i, real_numbers=n, character_strings=c, logicals=b, "The Matrix"=m) 
+```
+
+The single square brackets and double square brackets operators also work for named list elements:
+
+```{r lists-exercise-7, exercise=TRUE, exercise.setup="lists-exercise-6-set-up"}
+x['real_numbers']
+class(x['real_numbers'])
+```
+
+```{r lists-exercise-8, exercise=TRUE, exercise.setup="lists-exercise-6-set-up"}
+x[['real_numbers']]
+class(x[['real_numbers']])
+```
+
+### Activity: manipulating lists
+
+Many R statistical functions return their results in the form of a named list.
+We will use a built-in data set that comes with R, called `mtcars`, which contains data about motor cars,
+and we will use the `lm()` function to fit a linear regression model to two variables in that data set
+(we will see how fuel economy in miles per gallon is related to the weight of each car, in pounds: it is an American data set).
+We will store the results of that regression in an object called `lm_results`, using this code:
+
+```
+lm_results <- lm(mpg ~ wt, mtcars)
+```
+
+<div class="aside">
+### An aside...
+
+We haven't discussed the `~` operator (and won't in this tutorial).
+It is used to create a _formula_ object with the response on the left hand side and predictors on the right hand side.
+Here we are saying '`mpg` depends on `wt`' and when used to create and fit a statistical model we would be estimating the parameters of
+
+$$\textrm{mpg} = \alpha + \beta \, \textrm{wt} + \epsilon$$
+</div>
+
+`lm_results` is a list object.
+Your task is to use the `names()` function to see the names of the elements it contains,
+and then use double square brackets operator to extract three of the elements of `lm_results` and print out the contents of each element.
+
+```{r lists-exercise-9, exercise=TRUE}
+lm_results <- lm(mpg ~ wt, mtcars)
+
+```
+
+```{r lists-exercise-9-solution}
+lm_results <- lm(mpg ~ wt, mtcars)
+
+names(lm_results)
+
+coeffs <- lm_results[["coefficients"]]
+print(coeffs)
+
+print('------------------------------') # just to visually separate the elements
+    
+residuals <- lm_results[["residuals"]]
+print(residuals)
+
+print('------------------------------') # just to visually separate the elements
+
+terms <- lm_results[["terms"]]
+print(terms)
+```
+
+## Summary
+
+This concludes section 3 and our overview of matrices and lists.
+
+In section 4 we will look at _data frames_.
+
+

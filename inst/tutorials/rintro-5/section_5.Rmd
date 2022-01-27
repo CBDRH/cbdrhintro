@@ -1,0 +1,938 @@
+---
+title: "Introduction to R: section 5"
+tutorial:
+  id: "au.edu.unsw.cbdrh.intro_to_R.section5"
+  version: 0.1
+output: 
+  learnr::tutorial:
+    progressive: false
+    allow_skip: true
+    css: css/intro.css
+runtime: shiny_prerendered
+description: "Section 5: Writing functions in R"
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+tutorial_options(exercise.completion = FALSE, exercise.diagnostics = FALSE)
+```
+
+![](images/UNSW_2017_Big Data_landscape.jpg){width="75%"}
+
+## Overview
+
+This tutorial is broken into six sections.
+
+This section deals with writing functions in R.
+
+ * Writing functions in R
+ * Specifying function arguments
+ * Wrapper functions and ...
+ * Variable scope
+ * Passing functions as arguments
+
+<span class="copyright">© Copyright 2018 UNSW Sydney. All rights reserved except where otherwise stated.</span>
+
+## Writing functions in R
+
+We have already mentioned that R is a highly functional language,
+in the sense that almost everything is done by calling functions that operate on arguments passed to them.
+
+A key feature of R is the ability to write new functions and to use these
+just as one might use functions that are built into the core of the R language.
+
+Writing functions lets us avoid all the problems of repeating program code over and over,
+sometimes with only minor changes, in order to carry out repeated actions.
+
+Such code repetition, usually achieved by cutting-and-pasting existing code, then changing one small part of it,
+is a very bad practice and leads to programs that are very hard to read, debug and maintain.
+
+You should get into the habit of always writing R code as functions.
+Code that is written as a function is much easier to reuse somewhere else.
+The processing of writing a function helps clarify thinking about what is fixed behaviour and what is parametric behaviour.
+
+You can write functions too, even if the code is not used in multiple places.
+Breaking large pages of code up into smaller named chunks of code (functions are just named chunks of code)
+can make programmes more readable when we choose sensible function names which describe what the code in the function does.
+
+Also, a block of code should almost never run to more than a page or a screenful of code.
+Code chunks that are that big are hard to read and follow.
+Break them up in to smaller chunks by using functions.
+
+### Function syntax
+
+The basic syntax for creating a function in R is very simple.
+Let's create a function that calculates the _Body Mass Index_ (also known as _BMI_ or the _Quetelet index_).
+
+As noted in previous exercise instructions,
+the BMI of a person is defined as their weight in kilograms divided by the square of their height in metres.
+
+$$\textrm{BMI} \leftarrow \frac{\textrm{weight}}{\textrm{height} ^ 2}$$
+
+```{r functions-example-1, exercise=TRUE}
+wt <- 78.5 # weight in kilograms
+ht <- 1.75 # height in metres
+bmi <- wt / ht^2
+bmi
+```
+
+To calculate the BMI for another patient, we would need to repeat the code for the BMI calculation:
+
+```{r functions-example-2, exercise=TRUE}
+wt <- 82.9 # weight in kilograms
+ht <- 1.53 # height in metres
+bmi <- wt / ht^2
+bmi
+```
+
+Let's create a function to do the BMI calculation instead:
+
+```{r functions-example-3, exercise=TRUE}
+bmi <- function(wt, ht) {
+    bmi <- wt / ht^2
+    return(bmi)
+}
+
+# check what class bmi is
+class(bmi)
+
+# if we just print the function itself, R shows us the source code
+bmi
+```
+
+```{r functions-examples-set-up-a}
+bmi <- function(wt, ht) {
+    bmi <- wt / ht^2
+    return(bmi)
+}
+```
+
+Now we can use, and re-use, over and over, our own new `bmi()` function:
+
+```{r functions-example-4, exercise=TRUE, exercise.setup="functions-examples-set-up-a"}
+wt <- 78.5 # weight in kilograms
+ht <- 1.75 # height in metres
+bmi(wt, ht)
+```
+
+Note that the `bmi` object has a class of "function", and that it can manipulated like any other R object, such as storing it in a list.
+
+If you look clearly at the function declaration syntax we are just using `<-` to assign a function `function(wt, ht) { ... }` to a name `bmi`.
+It's just a normal assignment operation with a new type of value, a _function object_.
+
+Most modern languages handle functions like this because it allows them to be passed around.
+When we can pass functions around we can use them to control how things behave.
+For example, we can pass a function to a sorting routine to define what it means
+for one thing to come 'before' another and thus control sorting.
+In fact, we've already seen something like this when we passed a block of code into the `with()` statement to be executed.
+
+We describe this as 'functions being first-class objects', in other words
+we can pass them around and put them in variables like the number `5` or the string `"hello"`.
+Not all languages are like this.
+In languages such as SAS, functions are not first-class objects and this can limit what one can do,
+or at least make some things a lot harder.
+
+### Returning values from functions
+
+It is not strictly necessary to use the `return()` function to specify what is to be returned by a function.
+If there is no explicit `return()` inside a function definition,
+R will just return the value given by the last line in the function definition.
+
+Thus, we could have written our bmi() functions as follows:
+
+```
+bmi2 <- function(wt, ht) {
+    bmi <- wt / ht^2
+    bmi
+}
+```
+
+or even as
+
+```
+bmi3 <- function(wt, ht) {
+    wt / ht^2
+}
+```
+
+or you might even see code written like this, without the curly braces, since the body of the function has only one line:
+
+```
+bmi4 <- function(wt, ht) wt / ht^2
+```
+
+In practice though, one would not write code like the last example because it starts to become unreadble and a great
+principle to follow when programming is `clarity not brevity`. 
+
+Let's check that all those versions of our function give the same answer:
+
+```{r functions-example-6, exercise=TRUE, exercise.lines=23}
+bmi <- function(wt, ht) {
+    bmi <- wt / ht^2
+    return(bmi)
+}
+
+bmi2 <- function(wt, ht) {
+    bmi <- wt / ht^2
+    bmi
+}
+
+bmi3 <- function(wt, ht) {
+    wt / ht^2
+}
+
+bmi4 <- function(wt, ht) wt / ht^2
+
+ht <- 1.96
+wt <- 93.7
+bmi(wt, ht)
+bmi2(wt, ht)
+bmi3(wt, ht)
+bmi4(wt, ht)
+```
+
+The arguments passed to a function can be any R object,
+including vectors, matrices, lists, data frames or even other functions,
+and similarly the value returned from a function can be any type of R object.
+
+Does our `bmi()` function work when it is passed vectors of many heights and weights?
+
+```{r functions-example-7, exercise=TRUE, exercise.setup="functions-examples-set-up-a"}
+wts <- c(82.9, 78.5, 52.1)
+hts <- c(1.96, 1.75, 1.53)
+bmis <- bmi(wts, hts)
+bmis
+```
+
+So yes, it does! Our `bmi()` function works fine with vectors of values and performs calculations element-wise on the vectors.
+If you think about the expression the `bmi()` function is actually evaluating
+
+```
+wt / ht^2
+```
+
+then this is what we would expect since `ht^2` returns a vector with everything in `ht` squared
+and `wt / x` divides in the elements of `wt` by the elements of `x` element-by-element.
+Here `x` is `ht^2`.
+(Remember operator precedence means the `^` is being evaluated before the `/`.)
+
+## Activity: define a function
+
+Write a function to calculate the Mean Arterial Pressure (MAP) from the systolic (SBP) and diastolic (DBP) blood pressures. 
+
+Use the following formula to estimate MAP:
+
+$$ \textrm{MAP} \leftarrow DBP + \frac{\textrm{SBP} - \textrm{DBP}}{3} $$
+
+Demonstrate the use of your function using some typical blood pressure readings.
+
+```{r functions-exercise-1, exercise=TRUE, exercise.lines=6}
+
+
+```
+
+```{r functions-exercise-1-solution}
+map <- function(sbp, dbp) {
+    map <- dbp + ((sbp - dbp)/3)
+    return(map)
+}
+
+map(125, 80)
+map(150, 90)
+```
+
+Note that R will only return a single expression or object from a function.
+This is different to some programming languages, which can return many expressions or objects from a function.
+
+If you need to return several values or objects of different types from an R function,
+or if you need to return multiple vectors as a result of calculations,
+you can just add those objects to a list object (or a data frame) and return that list or data frame object.
+
+Remember, you can name the elements of a vector or list returned from a function to make it easier to use in the calling code.
+
+For example, imagine that we wanted a function that returned the argument passed to it,
+raised to the first, second, third, fourth and fifth powers.
+The argument passed in is a vector so we will be returning multiple vectors, five vectors in fact.
+We will need to use a list to hold our five vectors.
+
+We could write our function like this:
+
+```{r functions-example-8, exercise=TRUE}
+five_powers <- function(x) {
+    # create a list with 5 empty elements in it
+    result <- list(5)
+    result[[1]] <- x
+    result[[2]] <- x^2
+    result[[3]] <- x^3
+    result[[4]] <- x^4
+    result[[5]] <- x^5
+    return(result)
+}
+
+# test our function
+z <- five_powers(3)
+
+class(z)
+z
+```
+
+There's still a lot of code repetition here which we would normally remove and we'll look at ways of doing that in the final section.
+But, for the purposes of this example, it's very clear what we're doing: creating a list of 5 values and returning it.
+
+## Named arguments
+
+So far, we have created a `bmi()` function whose arguments, `weight` and `height`, are passed by position.
+
+That is,
+the first argument passed to the function when it is called is taken to be the `weight` argument,
+and the second argument passed when the function is called is taken to be the `height` argument.
+
+The arguments in the function definition are matched up with the arguments when the function is called in the order they are given.
+This means that if we pass the arguments to the function in the wrong order, we will get the wrong answer.
+If we swap weight and height in our `bmi()` function or the systolic and diastolic pressures in our `map()` function, R has no way of knowing.
+
+```{r functions-example-9, exercise=TRUE, exercise.setup="functions-examples-set-up-a"}
+bmi(82.9, 1.96) # arguments in correct order
+
+bmi(1.96, 82.9) # arguments in incorrect order!
+```
+
+However, it is also possible to define functions with named arguments,
+which can be very helpful in avoiding such errors,
+particularly if the function takes a large number of arguments.
+A named argument is defined by specifying the name followed by `=` followed by a default value for that argument.
+For example:
+
+```
+named_bmi <- function(wt=NA, ht=NA) {
+    return(wt / ht^2)
+}
+```
+
+Now, it doesn't matter which way around we pass the named arguments to our function:
+
+```{r functions-example-10, exercise=TRUE}
+named_bmi <- function(wt=NA, ht=NA) {
+    return(wt / ht^2)
+}
+
+named_bmi(wt=82.9, ht=1.96)
+
+named_bmi(ht=1.96, wt=82.9)
+```
+
+Named function arguments must be specified with a default value (which can be just `NA` or `NULL`).
+If you don't specify a named argument that has been defined for a function when calling that function,
+then the function will just use the default value for that argument.
+
+This returns `NA` because the default value for the `wt=` argument is `NA`:
+
+```{r functions-examples-set-up-c}
+named_bmi <- function(wt=NA, ht=NA) {
+    return(wt / ht^2)
+}
+```
+
+```{r functions-example-11, exercise=TRUE, exercise.setup="functions-examples-set-up-c"}
+named_bmi(ht=82.9)
+```
+
+Note that named arguments can still be passed to a function as unnamed positional arguments.
+This example, courtesy of [Software Carpentry](https://software-carpentry.org) illustrates the way in which this works:
+
+```{r functions-example-12, exercise=TRUE, exercise.lines=30}
+# define a function with three named arguments, that just prints out the values of those arguments
+display <- function(a = 1, b = 2, c = 3) {
+  result <- c(a, b, c)
+  names(result) <- c("a", "b", "c")  # This names each element of the vector
+  return(result)
+}
+
+print("call it with no arguments")
+display()
+
+print("one positional argument")
+display(55)
+
+print("two positional arguments")
+display(55, 66)
+
+print("three positional arguments")
+display(55, 66, 77)
+
+print("only setting the value of c")
+display(c = 77)
+
+# these last two examples are legal but bad practice because they are confusing rather than clarifying
+# the behaviour of code should be clear and unambiguous to the reader
+
+print("mixing positional and named arguments")
+display(a = 55, 66, c = 77)
+
+# even this works correctly because named arguments are matched before positional arguments
+display(66, a = 55, c = 77)
+```
+
+R will also do partial matching on argument names, provided it is unambiguous. Consider:
+
+```{r functions-example-13, exercise=TRUE, exercise.lines=20}
+# define a function with three named arguments, that just prints out the values of those arguments
+longarg_display <- function(a = 1, b = 2, long_named_argument = 3, long_nosed_argument = 4) {
+  result <- c(a, b, long_named_argument, long_nosed_argument)
+  # This names each element of the vector
+  names(result) <- c("a", "b", "long_named_argument", "long_nosed_argument")  
+  return(result)
+}
+
+# no arguments passed, just uses defaults
+longarg_display()
+
+# partial matching on named arguments
+longarg_display(long_na=79)
+
+# partial matching on named arguments
+longarg_display(long_no=89)
+
+# but partial matching must be unambiguous
+# uncomment the following line and re-run the code
+# longarg_display(long_n=59)
+```
+
+<div class="aside">
+### An aside...
+
+Partial name matching also works with named elements in lists and data frames.
+You can also use partial name matching when working with lists that have named elements,
+and with data frames (in which the columns behave like named elements in a list).
+For example:
+
+```{r functions-example-14, exercise=TRUE}
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          sex=c("F", "F", "M","F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+
+heights <- patients_df$he
+heights
+```
+
+It is fine to use such partial name matching when using R interactively,
+but **it is not good practice to use partial name matching in written programs.**
+Its use may introduce errors unexpectedly.
+
+Consider if we later added a new column called `health_status` to our `patients_df` data frame, above.
+
+The line:
+
+```
+heights <- patients_df$he
+```
+
+would now throw an error due to ambiguity problems. It is better to avoid such situations by using full names in written program code.
+</div>
+
+## Wrapper functions
+
+### The `...` (ellipsis) argument
+
+There is one other type of argument that can be passed to a function: the `...` (ellipsis) argument.
+
+This is used when the exact number of arguments for a function is not known in advance.
+
+Consider a function like `c()` or `paste()`.
+Both of these functions take a variable number of values (at least one) and combine them into a vector (in the case of `c()`)
+or a character string (in the case of `paste()`).
+
+The number of values that they take as arguments is not known or fixed in advance,
+and thus they use the `...` argument type to accommodate this.
+
+If you examine the manual page for the `c()` function, you will see that its syntax is described as `c(...)`
+
+The ellipsis argument type is also useful when you are writing functions
+that 'wrap' other functions in order to customise or modify their behaviour.
+
+Rather than having to explicitly list all the arguments required by the function that is being wrapped,
+once can just use the `...` argument as a placeholder for all those arguments.
+An example will help make this clearer.
+
+Let's consider the `hist()` function that creates a histogram chart from data passed to it:
+
+```{r functions-example-15, exercise=TRUE}
+# make sure we get repeatable behaviour from the random number generator
+set.seed(1234)
+
+# create a vector of 1000 random numbers with a Normal distribution 
+
+x <- rnorm(1000) 
+
+# create a histogram of these data
+hist(x)
+```
+
+The `hist()` function takes a large number of optional arguments used to set all sorts of attributes of the chart produced.
+
+Imagine we wanted to create a customised version of the `hist()` function that always made the histogram bars blue.
+We could write our customised histogram function like this:
+
+```{r functions-examples-set-up-d}
+set.seed(1234)
+x <- rnorm(1000) 
+blue_hist <- function(data) {
+    hist(data, col="blue")
+}
+```
+
+```{r functions-example-16, exercise=TRUE, exercise.setup="functions-examples-set-up-d"}
+blue_hist <- function(data) {
+    hist(data, col="blue")
+}
+
+blue_hist(x)
+```
+
+But what if we want to override the x-axis label so that it says 'a Normal random variate'?
+
+This won't work, because we haven't specified an `xlab` argument in the definition of our `blue_hist()` function:
+
+```{r functions-example-17, exercise=TRUE, exercise.setup="functions-examples-set-up-d"}
+blue_hist(x, xlab="a Normal random variate")
+```
+But if we include the ellipsis argument as one of the arguments to our `blue_hist()` function, it works!
+
+The `xlab` argument, and any other argument we pass to our `blue_hist()` function,
+are passed through to body of the function (the interior scope, see next section),
+and from there to any other ellipsis arguments used inside the function.
+
+```{r functions-example-18, exercise=TRUE, exercise.setup="functions-examples-set-up-d"}
+blue_hist <- function(data, ...) {
+    hist(data, col="blue", ...)
+}
+
+blue_hist(x, xlab="a Normal random variate")
+```
+
+This gives us a mechanism to pass on any number of extra arugments without having to know what they are
+and explicitly list them.
+It saves a lot of work now and later: if the `hist()` function gets a new argument to control something new
+we don't need to change our code.
+
+### Exercise
+
+Write a function that is a wrapper around the `hist()` function that sets the default number of histogram bins to 80.
+Demonstrate its use with a vector of 1000 Normal random variates, as used in the examples above.
+
+Hint: the `breaks=` argument to the `hist()` function sets the number of bins if given an integer value.
+
+```{r functions-exercise-2, exercise=TRUE, exercise.lines=10}
+
+
+```
+
+```{r functions-exercise-2-solution}
+hist80bins <- function(x, breaks=80, ...) {
+    hist(x, breaks=80, ...)
+}
+
+z <- rnorm(1000)
+
+hist80bins(z, main="An 80-binned histogram")
+```
+
+## Scoping in R
+
+A detailed discussion of environments (in the R sense) and scoping is too large for this tutorial,
+but some basic understanding of the scoping rules in R is essential.
+
+_Scope_ refers to the extent to which a name (like a variable or function name) and its association with a particular value
+may be relied on within code.
+We saw a glimpse of this when we looked at the `with()` function.
+A full discussion of _scope_ in the computer science sense
+can be found on [Wikipedia](https://en.wikipedia.org/wiki/Scope_(computer_science)).
+
+For example, if we bind the name `a` to an integer vector `c(1, 2, 3)`,
+then the scope of `a` is all the environments in R in which the name `a` points to that particular vector object.
+
+What do we mean by an `environment`?
+
+An environment can be thought of as a small world, in which objects live, and in which names are bound to those objects.
+
+When we write code in R, it mostly runs in what is called the global environment.
+
+When we define a new object and bind it to a name, _e.g._ `a <- c(1, 2, 3)`,
+then that integer vector value `c(1, 2, 3)` lives in the global environment
+and is visible to and can be referenced (used) by other objects in the global environment by the name `a`.
+
+Whenever we call a function in R, a new environment is created in which that function then runs.
+
+All objects created inside this new environment,
+and all names bound to those objects, are visible and thus can be referenced _only within that environment,_
+which exists only for the duration of the one specific function call.
+A new environment is created _each time a function is called_.
+
+Objects/name bindings in the parent environment _at the point at which the function was defined_ (note **not** where it is called)
+are visible and can be referenced within the new environment.
+This behaviour is known as _lexical scoping_.
+
+The new environment associated with a function call lasts only as long as that function call is running.
+
+Thus, when your code runs, new environments are popping into existence and then disappearing all the time.
+Depending on how many function calls 'deep' your programme is executing at there may be one, two or many enviroments
+which have all been created one after another as your code calls function within function as a _stack_ of enviroments:
+a new environment is pushed onto the stop of the stack when a function is entered and popped off the stack when the function finishes.
+
+At this stage you may be completely confused, but some examples may help to clarify these concepts.
+
+First, let's define a few objects in the top-level global environment (which is where all objects are created by default):
+
+```{r functions-example-19, exercise=TRUE}
+k <- c(1, 2, 3)
+k
+m <- c("hello", "world")
+m
+n <- sqrt(2:4)
+n
+```
+
+```{r functions-examples-set-up-e}
+k <- c(1, 2, 3)
+m <- c("hello", "world")
+n <- sqrt(2:4)
+square <- function(w) {
+    k <- w * w
+    return(k)
+}
+```
+
+OK, now let's write a function that returns the square(s) of its argument,
+and uses an object which is also called `k` to hold the result of its internal computation:
+
+```{r functions-example-20, exercise=TRUE, exercise.setup="functions-examples-set-up-e"}
+square <- function(w) {
+    k <- w * w
+    return(k)
+}
+```
+
+If we call this function, it returns the squares of the value(s) passed to it, as expected:
+
+```{r functions-example-21a, exercise=TRUE, exercise.setup="functions-examples-set-up-e"}
+n
+z <- square(n)
+z
+```
+
+So now what is the value of `k`?
+
+Recall that we used an object called `k` inside our `square()` function to hold the result of squaring the values passed to that function.
+But that `k` is completely separate to the `k` holding `c(1, 2, 3)` because it is in a different scope.
+It is inside the function not at global scope.
+
+Inside the function the binding between `k` and `c(1, 2, 3)` is temporarily forgotten
+and a new binding between `k` and the result `w * w` created.
+When our function finishes this binding is forgotten and the original one is visible again.
+
+The value of `k` is unchanged from when we originally assigned it as `c(1, 2, 3)`.
+
+```{r functions-examples-set-up-f}
+k <- c(1, 2, 3)
+m <- c("hello", "world")
+n <- sqrt(2:4)
+square <- function(w) {
+    k <- w * w
+    return(k)
+}
+z <- square(n)
+```
+
+```{r functions-example-21b, exercise=TRUE, exercise.setup="functions-examples-set-up-f"}
+k
+```
+
+The `k` binding defined inside the `square()` function is different to the `k` binding we defined originally, in the global environment.
+
+So, we can have more than one object with the same name, provided they exist in different environments.
+
+The result of this is that objects and the names assigned to then are private to the function call in which they are created.
+
+That means that you can freely use object names inside the functions you write,
+without having to worry about inadvertently overwriting the values of objects
+with the same name in the global environment (or whatever environment your function is called from).
+
+This is exactly what we want because it lets us write functions without having to worry about clashes.
+Imagine if we didn't have scoping:
+all your variable names would have to be different from each other not only throughout your entire programme
+but also with respect to every library you use and they would all have to be different to one another even from
+libraries which haven't been written yet!
+(It's hard to imagine but programming languages used to be like this. It's a good thing it's no longer like that)
+
+So, we have established that the `k` defined inside our `square()` function is different from the `k` defined in the global environment.
+
+But what names and objects _can_ be referenced inside our `square()` function?
+
+Let's print out, from inside the `square()` function while it is running, the values of all the variables we have recently defined.
+
+First we need to slightly extend our `square()` function to do this:
+
+```{r functions-example-22, exercise=TRUE, exercise.lines=20}
+square <- function(w) {
+    k <- w * w
+    # now print out the values of variables
+    print("The value of w is:")
+    print(w)
+
+    print("The value of k is:")
+    print(k)
+
+    print("The value of m is:")
+    print(m)
+
+    print("The value of n is:")
+    print(n)
+
+    # now return the value of k from within the function    
+    return(k)
+}
+```
+
+Now let's run our function again:
+
+```{r functions-examples-set-up-g}
+k <- c(1, 2, 3)
+m <- c("hello", "world")
+n <- sqrt(2:4)
+square <- function(w) {
+    k <- w * w
+    # now print out the values of variables
+    print("The value of w is:")
+    print(w)
+
+    print("The value of k is:")
+    print(k)
+
+    print("The value of m is:")
+    print(m)
+
+    print("The value of n is:")
+    print(n)
+
+    # now return the value of k from within the function    
+    return(k)
+}
+```
+
+```{r functions-example-23, exercise=TRUE, exercise.setup="functions-examples-set-up-g"}
+z <- square(n)
+```
+
+So, we can reference variables defined in the global environment from inside our function.
+
+This can be handy, because it means we do not have to pass in every value we might need in our function to the function as an argument.
+We can use global constants and data frames and vectors.
+
+However, we cannot modify these objects which were defined outside our function from inside our function.
+That's a good thing!
+
+```{r functions-example-24, exercise=TRUE, exercise.setup="functions-examples-set-up-g", exercise.lines=20}
+m <- c("hello", "world")
+       
+square <- function(w) {
+    k <- w * w
+
+    q <- c('from','inside', 'the', 'square', 'function')
+    m <- c(m, q)
+    print('The value of m inside the function is:')
+    print(m)
+
+    return(k)
+}
+
+z <- square(n)
+
+print('The value of m outside the function is:')
+print(m)
+```
+
+Thus, the key scoping rules to remember are:
+
+  * code in the body of a function can reference the value of objects which are visible in the environment at the point at which the function was defined
+  * by 'defined,' we mean where the code which defines the function is run, not where that code was written, _i.e._ where the 'f <- function(...) { ... }` statement is executed. It's a subtle but important distinction. Mostly you will define your own functions in the global environment (at least until you start to write your own R packages).
+  * objects defined outside a function cannot be modified from within a function.
+
+## Passing functions to other functions
+
+As already mentioned,
+functions are first-class objects in R which means one can pass a function as the argument to another function.
+
+Consider the built-in function `aggregate()`.
+
+You can read its manual page for full details, but in essence `aggregate()` takes a data frame,
+divides the rows of data in that data frame into disjoint sets (non-overlapping parts)
+based on the contents of data specified in the `by` argument,
+and then applies a function passed to `aggregate()` in the `FUN` argument.
+
+First, recall the contents of the `patients_df` data frame which we used above:
+
+```{r functions-example-25, exercise=TRUE}
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          sex=c("F", "F", "M","F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+patients_df
+```
+
+Let's use `aggregate()` to calculate the mean age, height and weight for each sex.
+
+We can do this by passing the `mean()` function as the `FUN` argument to `aggregate()`:
+
+```{r functions-examples-set-up-j}
+patients_df <- data.frame(id=c(123, 876, 935, 263),
+                          sex=c("F", "F", "M","F"),
+                          age=c(23, 47, 36, 78),
+                          height=c(167, 181, 178, 163),
+                          weight=c(63.2, 76.9, 86.3, 57.2))
+```
+
+```{r functions-example-26, exercise=TRUE, exercise.setup="functions-examples-set-up-j"}
+# select just our numeric columns and calculate their means
+aggregate(patients_df[,c("age", "height", "weight")], list(sex=patients_df$sex), mean)
+```
+
+We can just as easily pass some function other than `mean()`, say, `min()`:
+
+```{r functions-example-27, exercise=TRUE, exercise.setup="functions-examples-set-up-j"}
+aggregate(patients_df[,c("age", "height", "weight")], list(sex=patients_df$sex), min)
+```
+
+or `max()`:
+
+```{r functions-example-28, exercise=TRUE, exercise.setup="functions-examples-set-up-j"}
+aggregate(patients_df[,c("age", "height", "weight")], list(sex=patients_df$sex), max)
+```
+
+Notice that when we do this we are not _calling_ the function so there are no `()` after the function name.
+We are passing the function (without executing it) into another function.
+It would nearly always be an error for `()` to appear here because then the function would get evaluated and the _result_ of the
+function would get passed into `aggregate()`.
+Calling `mean()` without an argument would give an error.
+
+```{r functions-example-28a, exercise=TRUE, exercise.setup="functions-examples-set-up-j"}
+aggregate(patients_df[,c("age", "height", "weight")], list(sex=patients_df$sex), mean())
+```
+
+Calling `sum()` without an argument would return `0` which would then be passed into `aggregate()`
+which would then try to _call_ `0` as if it were a function (which obviously it can't do) and it would give an error.
+In fact, `aggregate()` detects that we're trying to pass in something that isn't a function and will tell us.
+
+```{r functions-example-28b, exercise=TRUE, exercise.setup="functions-examples-set-up-j"}
+aggregate(patients_df[,c("age", "height", "weight")], list(sex=patients_df$sex), sum())
+```
+
+One of the most common uses of passing functions to another function is with the _apply_ class of functions:
+
+  * `lapply()`: Loop over a list and evaluate a function on each element
+  * `sapply()`: Same as `lapply()` but try to simplify the result
+  * `apply()`: Apply a function over the margins of an array
+  * `tapply()`: Apply a function over subsets of a vector
+  * `mapply()`: Multivariate version of `lapply()`
+
+Let's create a list `l` which contains four numeric vectors, `a` to `d`,
+each of which contains 20 random numbers with a Normal distribution, and then calculate the mean of each of those vectors.
+
+(Because we have named the elements of our list here we'll see `$a`, `$b`, _etc._ when we print out `l`
+rather than `[[1]]`, `[[2]]`, _etc._.)
+
+```{r functions-example-29, exercise=TRUE}
+set.seed(1234)
+# create a list
+vec_len <- 20
+l <- list(a=rnorm(vec_len, 1), b=rnorm(vec_len, 2), c=rnorm(vec_len, 5), d=rnorm(vec_len, 10))
+l
+```
+
+```{r functions-examples-set-up-k}
+set.seed(1234)
+vec_len <- 20
+l <- list(a=rnorm(vec_len, 1), b=rnorm(vec_len, 2), c=rnorm(vec_len, 5), d=rnorm(vec_len, 10))
+```
+
+```{r functions-example-30, exercise=TRUE, exercise.setup="functions-examples-set-up-k"}
+# use lapply() to find the mean of each vector
+m <- lapply(l, mean)
+m
+```
+
+This works with functions we write ourselves, of course.
+
+Let's write our own function that returns the mean of just the interquartile range (that is, a trimmed mean).
+
+```{r functions-example-31, exercise=TRUE, exercise.setup="functions-examples-set-up-k"}
+mean_iqr <- function(x) {
+    quartiles <- quantile(x, probs=c(0.25, 0.75))
+    y <- x[x >= quartiles[1] & x <= quartiles[2]]
+    return(mean(y))
+}
+
+n <- lapply(l, mean_iqr)
+n
+```
+
+Because functions are things we can create and pass around we don't always need to give them a name
+(although usually this is a good idea because it can help make our intent much clearer).
+
+We can use anonymous (also called _lambda_) functions. Note here the function being passed to `lapply()` hasn't been given a name
+and then passed in, we just define a function in place.
+
+```{r functions-example-32, exercise=TRUE, exercise.setup="functions-examples-set-up-k"}
+n <- lapply(l, function(x) {
+    quartiles <- quantile(x, probs=c(0.25, 0.75))
+    y <- x[x >= quartiles[1] & x <= quartiles[2]]
+    return(mean(y))
+})
+
+n
+```
+
+A detailed exploration of the other _apply_ functions is beyond the scope of these notes,
+but such an exploration can be found in the chapter on
+Loop Functions in Roger Peng's excellent online text [_R Programming for Data Science_](https://bookdown.org/rdpeng/rprogdatascience/).
+
+### Exercise: use the `sapply()` function
+
+Write some R code that demonstrates the use of the `sapply()` function.
+`sapply()` is like `lapply()` but returns a vector (or matrix) if the result can be simplifed as such.
+
+```{r functions-exercise-3, exercise=TRUE, exercise.lines=20}
+
+
+
+```
+
+```{r functions-exercise-3-solution}
+# create a list
+vec_len <- 20
+l <- list(a=rnorm(vec_len, 1), b=rnorm(vec_len, 2), c=rnorm(vec_len, 5), d=rnorm(vec_len, 10))
+
+# define a function to pass to sapply()
+mean_iqr <- function(x) {
+    quartiles <- quantile(x, probs=c(0.25, 0.75))
+    y <- x[x >= quartiles[1] & x <= quartiles[2]]
+    return(mean(y))
+}
+
+# call sapply()
+n <- sapply(l, mean_iqr)
+
+n
+class(n)
+```
+
+## Summary
+
+This concludes section 5 and our overview of functions.
+
+In the final section, section 6, we will look at some control structures in R.
+
+

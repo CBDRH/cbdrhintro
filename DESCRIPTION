@@ -1,0 +1,20 @@
+Package: cbdrhintro
+Type: Package
+Title: Introductory tutorials for working in the R ecosystem
+Version: 0.1.0
+Author: as.person(c(
+    "James Farrow" <james@fn.com.au> [aut]",
+    "Tim Churches" <tim.churches@inghaminstitute.org.au> [aut]",
+    "UNSW Sydney [cph]"
+  ))
+Maintainer: <m.hanly@unsw.edu.au>
+Description: A collection of introductory tutorials covering data analysis in R, version control with git and dynamic reports with knitr.
+License: LICENCE file
+Imports: 
+  learnr (>= 0.10.1),
+  knitr (>= 1.37),
+  dplyr (>= 1.0.7),
+  rmarkdown (>= 2.11),
+  shiny (>= 1.7.1)
+Encoding: UTF-8
+LazyData: true
