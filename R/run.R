@@ -1,4 +1,4 @@
-#' run
+#' Run an interactive learnr tutorial
 #'
 #' @param tute
 #'
@@ -27,4 +27,18 @@ run <- function(tute) {
   }
 
   learnr::run_tutorial(tute, package = "cbdrhintro")
+}
+
+
+#' Show an index of available tutorials
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' index()
+index <- function(){
+
+learnr::available_tutorials(package = 'cbdrhintro')
+
 }

@@ -1,0 +1,13 @@
+name: knitr-intro
+title: knitr-intro
+username:
+account: cbdrh
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5553124
+bundleId: 5528781
+url: https://cbdrh.shinyapps.io/knitr-intro/
+when: 1643679315.05233
+lastSyncTime: 1643679315.05234
+asMultiple: FALSE
+asStatic: FALSE

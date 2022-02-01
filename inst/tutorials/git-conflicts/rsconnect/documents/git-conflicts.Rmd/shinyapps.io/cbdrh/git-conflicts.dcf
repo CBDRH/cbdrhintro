@@ -1,0 +1,13 @@
+name: git-conflicts
+title: git-conflicts
+username:
+account: cbdrh
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5553102
+bundleId: 5528776
+url: https://cbdrh.shinyapps.io/git-conflicts/
+when: 1643679208.45071
+lastSyncTime: 1643679208.45072
+asMultiple: FALSE
+asStatic: FALSE
