@@ -3,7 +3,6 @@
 #' @param tute
 #'
 #' @return
-#' @export
 #'
 #' @examples
 #' run()
@@ -26,7 +25,7 @@ run <- function(tute) {
       call. = FALSE)
   }
 
-  learnr::safe(learnr::run_tutorial(tute, package = "cbdrhintro"))
+  learnr::run_tutorial(tute, package = "cbdrhintro")
 }
 
 
