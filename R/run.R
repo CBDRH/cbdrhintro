@@ -26,7 +26,7 @@ run <- function(tute) {
       call. = FALSE)
   }
 
-  learnr::run_tutorial(tute, package = "cbdrhintro")
+  learn::safe(learnr::run_tutorial(tute, package = "cbdrhintro"))
 }
 
 
