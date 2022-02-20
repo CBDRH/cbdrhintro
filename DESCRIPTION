@@ -1,7 +1,7 @@
 Package: cbdrhintro
 Type: Package
 Title: Introductory tutorials for working in the R ecosystem
-Version: 0.1.0
+Version: 0.1.1
 Author: as.person(c(
     "James Farrow" <james@fn.com.au> [aut]",
     "Tim Churches" <tim.churches@inghaminstitute.org.au> [aut]",
