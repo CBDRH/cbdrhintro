@@ -1,0 +1,1462 @@
+---
+title: "Manipulating data with dplyr"
+tutorial:
+  id: "au.edu.unsw.cbdrh.hdat9800.chapter1.dplyr"
+  version: 1.3.6
+output:
+  learnr::tutorial:
+    progressive: true
+    css: css/tutorials.css
+    smart: false
+    md_extension: "-smart"
+runtime: shiny_prerendered
+description: "UNSW Health Data Science: manipulating data with dplyr"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(learnr)
+library(dplyr)
+library(nycflights13)
+library(ggplot2)
+```
+
+![](images/UNSW_2017_Big_Data_landscape.jpg){width="75%"}
+
+## Overview
+
+This tutorial looks at _dplyr_.
+Dplyr provides ways to manipulate data frames that makes code more readable and the intent clearer.
+In most cases it's a considerable improvement over performing the equivalent task in base $\textsf{R}$.
+
+<span class="copyright">© Copyright 2018-2022 UNSW Sydney. All rights reserved except where otherwise stated.</span>
+
+We will look at the basics provided by _dplyr_ and then some examples and applications.
+
+Compared to other existing existing options, _dplyr_ abstracts away how the data is stored,
+so that you data stored in data frames, data tables or remote databases
+can be manipulated using the same set of functions and the same $\textsf{R}$ code
+This lets you focus on what you want to achieve, not on the logistics of data storage.
+
+_dplyr_ provides a thoughtful default `print()` method that doesn't automatically print pages of data to the screen
+(this was inspired by _data.table_'s output).
+
+Compared to base $\textsf{R}$ functions _dplyr_ is much more consistent:
+
+  * all of _dplyr's_ data manipulation functions have the same interface. 
+    * once one has been mastered it's easy to pick up the others
+  * base $\textsf{R}$ functions tend to be based around vectors 
+  * _dplyr_ is based around data frames
+
+## Introduction
+
+To manipulate data we need to
+
+ * know what we want to do
+ * work out how to do it
+ * describe those steps as a computer programme
+ * execute the programme
+
+The _dplyr_ library provides a high-level vocabulary of common data manipulation tasks.
+They are used as building blocks for more complex data manipulation tasks.
+The simple constrained building blocks of _dplyr_ help translate thoughts into easy to follow code.
+In addition, _dplyr_ can be attached to different backends to deal with files, databases, &c. in an efficient manner.
+Think of the building blocks as ‘verbs’ which let you act on data.
+
+_Dplyr_ aims to provide a function for each basic verb of data manipulation.
+
+ * [_filter()_](#filter) and [_slice()_](#slice)
+ * [_arrange()_](#arrange)
+ * [_select()_](#select) and [_rename()_](#rename)
+ * [_distinct()_](#distinct)
+ * [_mutate()_](#mutate) and [_transmute()_](#transmute)
+ * [_summarise()_](#summarise)
+ * [_sample_n()_](#sample_n) and [_sample_frac()_](#sample_frac)
+
+This tutorial is based on a vignette by Hadley Wickham, adapted by Tim Churches.
+It will introduce you to the basics of _dplyr_ and show how they are used on data frames.
+Further information is available on CRAN which has many tutorials on various topics.
+
+Let's load some sample data and go through these verbs to see what they do.
+
+## Setup
+
+We will use some built in data frames for this tutorial.
+We will use the _nycflights13_ data frame:
+
+ * this dataset contains all 336,776 flights that departed from New York City in 2013
+ * the data comes from the US Bureau of Transportation Statistics
+ * more info via `?nycflights13`
+
+This is how we tell $\textsf{R}$ we want to use the _dplyr_ library
+and the _nycflights13_ data (which contains the _flights_ data frame) in our code.
+Loading _dplyr_ will give warnings about objects being masked.
+This is just $\textsf{R}$ telling us that some functions in _dplyr_ are replacing some standard functions
+(with better functions).
+
+```{r unload-libraries}
+detach("package:dplyr")
+detach("package:nycflights13")
+```
+
+```{r load-libraries, echo=TRUE, exercise=FALSE}
+library(dplyr)
+library(nycflights13)
+```
+
+### Checking everything loaded
+
+Let's increase our confidence we've loaded the right dataset by checking its size using _dim()_,
+which will show us the number of observations (rows) in the data frame and the number of columns.
+Let's also look at the first few rows of the data frame using _head()_.
+
+```{r prepare-flights}
+flights <- nycflights13::flights
+```
+
+```{r load-check, exercise=TRUE, exercise.lines = 3, exercise.setup="prepare-flights"}
+dim(flights)
+head(flights, 10)
+```
+
+There should be 336,776 observations and 19 columns.
+The call _head(flights, 10)_ should show us the first 10 rows of the _flights_ dataframe.
+
+Let's look next at the verbs supplied by _dplyr_.
+
+## Filter
+
+_filter()_ allows you to select a subset of rows in a data frame.
+
+ * the first argument is the name of the data frame
+ * the second argument is a logical expression that filters the data frame
+ * if more arguments follow then they are additional logical expressions that are also used to filter the data frame, _i.e._ only rows which match _all_ of the logical expressions pass the filtering process and are part of the result.
+
+For example, we can filter all flights by January 1st with:
+
+```{r filter-january-1, exercise=TRUE, exercise.setup="prepare-flights"}
+filter(flights, month == 1, day == 1)
+```
+
+This will filter the 336,776 observations down to 842 observations: those that have a month equal to 1 _and_ a day equal to 1.
+
+Try filtering the _flights_ data frame down to just the entries in February.
+
+```{r filter-february, exercise=TRUE, exercise.setup="prepare-flights"}
+
+```
+
+```{r filter-february-hint-1}
+filter(flights, ...)
+```
+
+```{r filter-february-hint-2}
+filter(flights, month == ?)
+```
+
+```{r filter-february-hint-3}
+filter(flights, month == 2)
+```
+
+There are 24,951 entries for February.
+The results widget may not show all of them in this tutorial but you can check the size of the result using _dim()_.
+
+`filter(flights, month == 1, day == 1)` is a lot easier to read than the equivalent code in base $\textsf{R}$.
+The equivalent code in base $\textsf{R}$ is:
+
+```
+flights[flights$month == 1 & flights$day == 1, ]
+```
+
+Verify that these two pieces of code do the same thing.
+
+```{r filter-verify, exercise=TRUE, exercise.setup="prepare-flights"}
+flights[flights$month == 1 & flights$day == 1, ]
+filter(flights, month == 1, day == 1)
+```
+
+This builds two mask vectors, one with `TRUE` where `month == 1` and one with `TRUE` where `day == 1`
+and then logically ANDs them together to create the final mask which is used to slice `flights`.
+
+_filter()_ works similarly to _subset()_ in base $\textsf{R}$, except that you can give it any number of filtering conditions,
+which are joined together with `&`.
+
+You can also use other boolean operators to create more complex expressions.
+
+```
+filter(flights, month == 1 | month == 2)
+```
+
+### Quiz
+
+Some questions to verify that you understand _filter()_.
+
+```{r filter-quiz}
+quiz(
+  question("Which package have we been discussing that contains the routines for manipulating data frames?",
+    answer("learnr", message = "_learnr_ is an $\textsf{R}$ package for writing interactive tutorials (like this one!)"),
+    answer("ggplot2", message = "_ggplot2_ is used for drawing charts and data visualisation"),
+    answer("dplyr", correct = TRUE),
+    answer("codetools", message = "_codetools_ contains code analysis tools for $\textsf{R}$"),
+    random_answer_order = TRUE, allow_retry = TRUE
+  ),
+  question("Which function is used to select _rows_ from a data frame based on a series of logical statements?",
+    answer("slice", message = "_slice_ selects rows by position"),
+    answer("filter", correct = TRUE),
+    answer("transmute", message = "_transmute_ creates a new data frame with new calculated columns"),
+    answer("select", message = "_select_ creates a new data frame with only the named columns"),
+    random_answer_order = TRUE, allow_retry = TRUE
+  ),
+  question("The expression `filter(flights, month == 1, day == 1)` is equivalent to which base $\textsf{R}$ example?",
+    answer("flights[flights$month == 1 & flights$day == 1]"),
+    answer("flights[flights$month == 1 | flights$day == 1, ]"),
+    answer("flights[flights$month == 1 & flights$day == 1, ]", correct = TRUE),
+    answer("flights[flights$month == 1, ] & flights[flights$day == 1, ]"),
+    random_answer_order = TRUE, allow_retry = TRUE
+  ),
+  question("The _filter()_ function:",
+    answer("selects rows from a data frame based on a series of logical expressions.", correct = TRUE),
+    answer("selects rows from a data frame by position index."),
+    answer("selects columns from a data frame by name."),
+    answer("selects columns from a data frame by position index."),
+    random_answer_order = TRUE, allow_retry = TRUE
+  )
+)
+```
+
+## Slice
+
+_slice()_ is similar to _filter()_ but operates using position indices rather than logical expressions.
+
+```{r slice, exercise = TRUE, exercise.setup="prepare-flights"}
+slice(flights, 1:15)
+```
+
+### Quiz
+
+```{r slice-quiz}
+quiz(
+  question("The _slice()_ function:",
+    answer("selects rows from a data frame based on a series of logical expressions."),
+    answer("selects rows from a data frame by position index.", correct = TRUE),
+    answer("selects columns from a data frame by name."),
+    answer("selects columns from a data frame by position index."),
+    random_answer_order = TRUE, allow_retry = TRUE
+  )
+)
+```
+
+## Arrange
+
+`arrange()` works similarly to `filter()` except that instead of filtering or selecting rows, it reorders them.
+
+It takes a data frame, and a set of column names (or more complicated expressions) to order by.
+
+If you provide more than one column name, each additional column will be used to break ties in the values of preceding columns.
+For example, arrange the flights data by year, then by month within year, then by day within month.
+
+```{r arrange, echo=TRUE, exercise=FALSE}
+arrange(flights, year, month, day)
+```
+
+Use `desc()` to order a column in descending order.
+For example, arrange the flights data in order of decreasing arrival delay.
+
+```{r arrange-desc, echo=TRUE, exercise=FALSE}
+arrange(flights, desc(arr_delay))
+```
+
+`dplyr::arrange()` works the same way as `plyr::arrange()`.
+It’s a straightforward wrapper around `order()` that requires less typing.
+
+The previous examples are equivalent to:
+
+- arrange by year, month, day: `flights[order(flights$year, flights$month, flights$day), ]`
+- arrange by decreasing arrival time: `flights[order(flights$arr_delay, decreasing = TRUE), ]` or `flights[order(-flights$arr_delay), ]`
+
+### Activity
+
+Order the flights data by increasing arrival delay (`arr_delay`) and decreasing departure delay (`dep_delay`).
+
+```{r arrange-asc-desc, exercise=TRUE, exercise.setup="prepare-flights"}
+
+```
+
+```{r arrange-asc-desc-hint-1}
+arrange(flights, ...)
+```
+
+```{r arrange-asc-desc-hint-2}
+arrange(flights, arr_delay, ...)
+```
+
+```{r arrange-asc-desc-hint-3}
+arrange(flights, arr_delay, desc(dep_delay)
+```
+
+### Quiz
+
+```{r arrange-quiz}
+quiz(
+  question("The _arrange()_ function:",
+    answer("reorders the columns and rows of a data frame based on a series of logical expressions."),
+    answer("reorders rows in a data frame based on the value of specific columns.", correct = TRUE),
+    answer("reorders columns in a data frame."),
+    answer("reorders the columns and rows of a data frame based on a supplied vector"),
+    random_answer_order = TRUE, allow_retry = TRUE
+  ),
+  question("The expression `arrange(flights, month, day)` is equivalent to which base $\textsf{R}$ example?",
+    answer("flights[order(flights$month, flights$day), ]", correct = TRUE),
+    answer("flights[order(flights$month, flights$day)]"),
+    answer("flights[flights$month, flights$day]"),
+    answer("order(flights$month, flights$day)"),
+    random_answer_order = TRUE, allow_retry = TRUE
+  )
+)
+```
+
+## Select
+
+Often one works with large datasets with many columns but only a few are actually of interest.
+
+`select()` allows zooming in on a useful subset using operations that usually only work on numeric variable positions.
+
+`select()` does allow the use of numeric variable position
+
+```{r select-by-index, echo=TRUE, exercise=FALSE}
+select(flights, 1:3)
+```
+
+but it's much more useful when used to select by _name_:
+
+```{r select, echo=TRUE, exercise=FALSE}
+select(flights, year, month, day)
+```
+
+`select()` also allows the selection of a range of columns by specifying the starting and ending column names.
+
+```{r select-range, echo=TRUE, exercise=FALSE}
+select(flights, year:day)
+```
+
+`select()` works similarly to the select argument in `base::subset()`.
+
+Because the _dplyr_ philosophy is to have small functions that do one thing well, it’s provided as a function in _dplyr_.
+
+### Helper functions
+
+There are a number of helper functions you can use within `select()`, like `starts_with()`, `ends_with()`, `matches()` and `contains()`.
+These let you quickly match larger blocks of variables that meet some criterion.
+See `?select` for more details.
+
+```{r select-starts-with, echo=TRUE, exercise=FALSE}
+select(flights, starts_with("d"))
+```
+
+### Negating selections
+
+`select()` can be told to retain all but the given columns by using `-`.
+For example, to remove the columns from `"dep_time"` to `"arr_delay"` inclusive:
+
+```{r select-negate, echo=TRUE, exercise=FALSE}
+select(flights, -(dep_time:arr_delay))
+```
+
+Multiple columns can be ignored and this can be combined with the helper functions.
+For example, to remove the `year`, `hour` and `minute` columns and any columns which end with `"delay"` or `"time"`:
+
+```{r select-negate-2, echo=TRUE, exercise=FALSE}
+select(flights, -year, -hour, -minute, -ends_with("delay"), -ends_with("time"))
+```
+
+### Renaming columns as part of the select
+
+Columns may be renamed as part of the selection process by providing named arguments.
+Note that the original data frame is not modified.
+
+```{r select-rename, echo=TRUE, exercise=FALSE}
+select(flights, tail_num=tailnum)
+names(flights)
+```
+
+### Activities
+
+Select all the columns whose names end with `"delay"` or `"time"`.
+
+```{r select-activity, exercise=TRUE, exercise.setup="prepare-flights"}
+
+```
+
+```{r select-activity-hint-1}
+select(flights, ...)
+```
+
+```{r select-activity-hint-2}
+select(flights, ends_with(...), ends_with(...))
+```
+
+```{r select-activity-hint-3}
+select(flights, ends_with("delay"), ends_with("time"))
+```
+
+Select all the columns whose names don't contain `"time"`.
+
+```{r select-activity-2, exercise=TRUE, exercise.setup="prepare-flights"}
+
+```
+
+```{r select-activity-2-hint-1}
+select(flights, ...)
+```
+
+```{r select-activity-2-hint-2}
+select(flights, -contains(...))
+```
+
+```{r select-activity-2-hint-3}
+select(flights, -contains("time"))
+```
+
+Select just the `arr_delay` and `dep_delay` columns from flights but rename them `arrival_delay` and `departure_delay`.
+
+### Quiz
+
+```{r select-quiz}
+quiz(
+  question("The _select()_ function:",
+    answer("extracts a subset of columns from a data frame based on name or position.", correct = TRUE),
+    answer("extracts a single column from a data frame based on name or position."),
+    answer("extracts a subset of rows from a data frame based on name."),
+    answer("extracts a subset of rows from a data frame based on position."),
+    random_answer_order = TRUE, allow_retry = TRUE
+  ),
+  question("Helper functions for _select()_ like _starts_with()_",
+    answer("extract zero or more columns from the data frame matching the given criterion.", correct = TRUE),
+    answer("extract one or more columns from the data frame matching the given criterion."),
+    answer("modifies columns in the data frame to match the given criterion."),
+    answer("counts the number of columns which would be extracted matching the given criterion."),
+    random_answer_order = TRUE, allow_retry = TRUE
+  ),
+  question("Using a `-` as in `select(flights, -arr_delay)`:",
+    answer("extracts every column except arr_delay", correct = TRUE),
+    answer("extracts the arr_delay column and negates the values in the column"),
+    answer("extracts the arr_delay column and sorts it in descending order."),
+    answer("modifies the data frame to remove the arr_delay column."),
+    random_answer_order = TRUE, allow_retry = TRUE
+  )
+)
+```
+
+### Section complete
+
+You have completed the _select()_ tutorial.
+
+## Rename
+
+The _rename()_ function returns the whole data frame with selected columns renamed.
+Again, like all the other _dplyr_ function, the original source data frame remains unchanged.
+A new data frame is returned with the renamed columns.
+
+```{r rename, echo=TRUE, exercise=FALSE}
+rename(flights, y = year, m = month, d = day)
+names(flights)
+```
+
+The equivalent of `d <- rename(tail_num = tailnum)` in base $\textsf{R}$ would be
+
+```
+d <- data.table::copy(flights)
+names(d)[names(d)=="tailnum"] <- "tail_num"
+```
+
+## Distinct
+
+The `distinct()` function finds unique values in a table:
+
+```{r, echo=TRUE, exercise=FALSE}
+distinct(flights, tailnum)
+```
+
+When more than one column is requested, _distinct()_ finds unique tuples of values.
+
+```{r, echo=TRUE, exercise=FALSE}
+distinct(flights, origin, dest)
+```
+
+### Activities
+
+Extract the list of carriers from the `flights` data table.
+
+```{r distinct-carriers, exercise=TRUE, exercise.setup="prepare-flights"}
+
+```
+
+```{r distinct-carriers-hint-1}
+distinct(flights, ...)
+```
+
+```{r distinct-carriers-hint-2}
+distinct(flights, carrier)
+```
+
+```{r distinct-carriers-check-disabled}
+#code <- for_checkr(USER_CODE)
+#line_where(code,
+#           insist(is.data.frame(V), "Didn't find an appropriate statement producing a dataframe."),
+#           insist(nrow(V) == 16), "Expected 16 rows in the result.")
+```
+
+Extract the list of flight identifers (carrier and flight number) from the `flights` data table.
+
+```{r distinct-flight-ids, exercise=TRUE, exercise.setup="prepare-flights"}
+
+```
+
+```{r distinct-flight-ids-hint-1}
+distinct(flights, carrier, ...)
+```
+
+```{r distinct-flight-ids-hint-2}
+distinct(flights, carrier, flight)
+```
+
+### Quiz
+
+```{r distinct-quiz}
+quiz(
+  question("The _distinct()_ function:",
+    answer("finds unique occurences of values in a column or columns in a data frame.", correct = TRUE),
+    answer("tests to see if data in a data frame in unique."),
+    answer("removes tincture from a data frame."),
+    answer("ensures columns are uniquely named in a data frame."),
+    random_answer_order = TRUE, allow_retry = TRUE
+  )
+)
+```
+
+## Mutate
+
+Besides selecting sets of existing columns,
+it's often useful to add new columns that are functions of existing columns.
+This is the job of `mutate()`.
+The new columns will be added at the right-hand end of the data frame.
+
+```{r mutate-activity-1, exercise=TRUE, exercise.setup="prepare-flights"}
+mutate(flights,
+  gain = arr_delay - dep_delay,
+  speed = distance / air_time * 60)
+```
+
+`dplyr::mutate()` works similarly to `base::transform()`
+
+The key difference between `mutate()` and `transform()` is that mutate allows us to refer to columns that we've just created:
+
+```{r mutate-activity-2, exercise=TRUE, exercise.setup="prepare-flights"}
+mutate(flights,
+  gain = arr_delay - dep_delay,
+  gain_per_hour = gain / (air_time / 60)
+)
+```
+
+Whereas one can't do that in one step with `transform()`.
+
+```{r mutate-activity-3, exercise=TRUE, exercise.setup="prepare-flights"}
+transform(flights,
+  gain = arr_delay - dep_delay,
+  gain_per_hour = gain / (air_time / 60)
+)
+```
+
+## Transmute
+
+Using `mutate()` returns a new data frame with all the original columns plus the new columns.
+If you only want to keep the new columns, use `transmute()` instead.
+
+```{r transmute-activity-1, exercise=TRUE, exercise.setup="prepare-flights"}
+transmute(flights,
+  gain = arr_delay - dep_delay,
+  gain_per_hour = gain / (air_time / 60)
+)
+```
+
+Notice the new data frame _only_ contains the new columns.
+Of course, columns can be passed through unmodified if you want some kept.
+
+```{r transmute-activity-2, exercise=TRUE, exercise.setup="prepare-flights"}
+transmute(flights,
+  dep_delay,
+  arr_delay,
+  gain = arr_delay - dep_delay,
+  gain_per_hour = gain / (air_time / 60)
+)
+```
+
+And even reorded in the process as the above example shows.
+
+## Summarise
+
+Our last basic verb is `summarise()`.
+The `summarise()` function collapses a data frame to a single row:
+
+```{r summarise-activity-1, exercise=TRUE, exercise.setup="prepare-flights"}
+summarise(flights,
+  mean_dep_delay = mean(dep_delay, na.rm = TRUE))
+```
+
+We can supply more that one function.
+
+```{r summarise-activity-2, exercise=TRUE, exercise.setup="prepare-flights"}
+summarise(flights,
+  mean_dep_delay = mean(dep_delay, na.rm = TRUE),
+  median_dep_delay = median(dep_delay, na.rm = TRUE))
+```
+
+The functions used in `summarise()` must return a single value.
+
+```{r summarise-activity-3, exercise=TRUE, exercise.setup="prepare-flights"}
+multiple_values <- function() {
+  c(1, 2, 5)
+}
+
+summarise(flights,
+  mean_dep_delay = mean(dep_delay, na.rm = TRUE),
+  oops = multiple_values())
+```
+
+
+## Sample
+
+We can take random samples from a data frame using `sample_n()` and `sample_frac()`.
+
+`sample_n() selects _n_ rows at random from a data frame.
+
+```{r sample-activity-1, exercise=TRUE, exercise.setup="prepare-flights"}
+sample_n(flights, 10)
+```
+
+We haven't set the random number seed here so each time we run the above code we'll get a different random 10 rows.
+Try running the code again to see.
+
+Sampling choses _n_ rows from the total so we will not get duplicates (unless there are duplicates in the table)
+and we cannot choose more rows than there are in the table,
+_i.e._ `n <= nrow(data)`.
+After a row is chosen it is removed from the pool of possible future choices.
+Think of this like randomising the order of the rows and then choosing the first _n_ rows.
+
+If we want to sample with _replacement_,
+that is after we choose a row it is put back into the pool and may be selected again,
+we need to supply the `replace=TRUE` argument.
+In this case we can get duplicates.
+We can also ask for a sample that is larger than our original data,
+_i.e._ `n` > `nrow(df)`.
+
+```{r sample-activity-2, exercise=TRUE}
+df = data.frame(id=c("a", "b", "c", "d", "e"))
+
+sample_n(df, 4, replace=TRUE)
+sample_n(df, 10, replace=TRUE)
+```
+
+Try running this a few times and looking for duplicates in the first table.
+(The second table will always have duplicates.)
+Try removing `replace=TRUE` from each call in turn and see what happens.
+
+Notice that `sample_n()` names the rows of the result for us and indicates duplicated records in the naming scheme.
+
+A `sample_frac()` function lets us select a proportion of the total number of rows.
+The proportion fraction must be less or equal to one if we are not sampling with replacement.
+
+```{r sample-activity-3-setup}
+df = data.frame(id=c("a", "b", "c", "d", "e"))
+```
+
+```{r sample-activity-3, exercise=TRUE, exercise.setup="sample-activity-3-setup"}
+sample_frac(df, 0.6)
+sample_frac(df, 1.4, replace=TRUE)
+```
+
+The `sample` functions also let us weight the chances of choosing individual rows instead of all rows having the same chance.
+We do this by passing in a weight vector using the `weight` argument.
+The weight vector must be the same size as the the data.
+
+```{r sample-activity-4, exercise=TRUE, exercise.setup="sample-activity-3-setup"}
+weights <- c(10, 1, 1, 1, 1)
+
+sample_n(df, 1, weight=weights)
+sample_n(df, 10, weight=weights, replace=TRUE)
+```
+
+When sampling with replacement the (normalised) weight vector gives the probability of a record being chosen each time.
+When sampling without replacement after each choice the corresponding weight it removed with each row
+so `nrow(weight)` must be greater than or equal to `n`.
+
+## A better syntax
+
+You may have noticed that the syntax and function of all these verbs are very similar:
+
+  * the first argument is a data frame
+  * the subsequent arguments describe what to do with the data frame
+    * notice that you can refer to columns in the data frame directly without using `$`
+  * the result is a new data frame
+
+Together these properties make it easy to chain together multiple simple steps to achieve a complex result.
+
+### The beginnings of a nice data manipulation language
+
+These five functions provide the basis of a language of data manipulation.
+
+At the most basic level, you can only alter a data frame in five useful ways:
+  * you can reorder the rows (`arrange()`)
+  * pick observations and variables of interest (`filter()` and `select()`)
+  * add new variables that are functions of existing variables (`mutate()`)
+  * collapse many values to a summary (`summarise()`)
+
+## Chaining data manipulation steps
+
+The _dplyr_ API is _functional_ in the technical sense that function calls don’t have side-effects: the original data frame is unchanged.
+
+<div class="aside">
+### An aside...
+
+A purely _functional_ language (like Lisp) or style of programming, treats computation as the evaluation of functions
+and avoids changing-state and mutable data of inputs to function.
+That is, you pass in data and a new result is computed and returned and the original data remains unchained.
+The _dplyr_ data manipulation functions behave like this.
+</div>
+
+It's up to us to save the results we need somewhere.
+This doesn’t lead to particularly elegant code, especially if you want to do many operations at once.
+We have to do it step-by-step, saving each result
+
+```
+a1 <- group_by(flights, year, month, day)
+a2 <- select(a1, arr_delay, dep_delay)
+a3 <- summarise(a2,
+  arr = mean(arr_delay, na.rm = TRUE),
+  dep = mean(dep_delay, na.rm = TRUE))
+a4 <- filter(a3, arr > 30 | dep > 30)
+```
+
+or if you don’t want to save the intermediate results, we need to nest the function calls inside each other
+
+```
+filter(
+  summarise(
+    select(
+      group_by(flights, year, month, day),
+      arr_delay, dep_delay
+    ),
+    arr = mean(arr_delay, na.rm = TRUE),
+    dep = mean(dep_delay, na.rm = TRUE)
+  ),
+  arr > 30 | dep > 30
+)
+```
+
+Neither of these is particularly readable or clear.
+They are difficult to read because of the extra temporary variable in the first example,
+and because the order of the operations is from inside to out in the second example
+There are extra bits just to make it work which distract from clearly showing the intent.
+In the second case the arguments are a long way away from the function which decreases clarity and understanding.
+
+To get around this problem, _dplyr_ provides the `%>%` operator.
+We can write `x %>% f(y)` and it get turned into `f(x, y)`.
+We can use it to rewrite multiple operations that can now be read left-to-right, top-to-bottom.
+
+<div class="aside">
+### An aside: magrittr...
+
+The [_magrittr_](https://cran.r-project.org/web/packages/magrittr/index.html) library
+provides a generalised version of the pipe operator `%>%`.
+</div>
+
+For example, here are the above manipulations written as a _pipeline_ or a series of _chained_ operations.
+
+```{r chaining-activity-1, exercise=TRUE, exercise.setup="prepare-flights"}
+flights %>%
+  group_by(year, month, day) %>%
+  select(arr_delay, dep_delay) %>%
+  summarise(
+    arr = mean(arr_delay, na.rm = TRUE),
+    dep = mean(dep_delay, na.rm = TRUE)
+  ) %>%
+  filter(arr > 30 | dep > 30)
+```
+
+This is _much_ clearer:
+
+  * start with the `flights` data frame
+  * group the records according to distinct values of year, month and day
+  * select the arrival and departure delays
+  * summarise those as means
+  * filter out and keep just the rows where the mean arrival deley or departure delay is greater than 30
+
+<div class="aside">
+### An aside...
+
+We'll talk about _gropuing_ presently but note that _dplyr_ ensures we have the grouping variables in our data
+and warns us that they've been added in for us.
+If we explicitly them ourselves using `select(year, month, day, arr_delay, dep_delay)` the warning goes away.
+</div>
+
+## Grouped operations
+
+The _dplyr_ data manipulation verbs are useful on their own,
+but they become really powerful when you apply them to groups of observations within a dataset.
+In _dplyr_, you do this by with the `group_by()` function.
+
+`group_by()` breaks down a dataset into specified groups of rows.
+Applying the data manipulation verbs on the resulting object automatically applies them 'by group.'
+Most importantly, all this is achieved by using the same exact syntax used with an ungrouped object.
+
+Grouping affects the verbs as follows:
+
+  * grouped `select()` is the same as ungrouped `select()`, except that _grouping variables are always retained_
+  * grouped `arrange()` _orders first by the grouping variables_
+  * `mutate()` and `filter()` are most useful in conjunction with window functions
+    * like `rank()`, or `min(x) == x`
+  * `sample_n()` and `sample_frac()` sample the specified number/fraction of rows _in each group_
+  * `slice()` extracts rows _within each group_
+  * `summarise()` summarises _per group_, as one would expect
+
+### Grouped operations, an example
+
+In the following example:
+
+  * we split the `flights` dataset into individual planes, and
+  * then summarise each plane by counting the number of flights (`count = n()`) and
+  * compute the average distance (`dist = mean(Distance, na.rm = TRUE)`)
+  * and arrival delay (`delay = mean(ArrDelay, na.rm = TRUE)`)
+  * we'll then use `ggplot2` to display the output in a nice way
+
+We'll need to load the [_ggplot2_](https://ggplot2.tidyverse.org) library
+
+```{r load-ggplot2, echo=TRUE}
+library(ggplot2)
+```
+
+```{r grouping-activity-1, exercise=TRUE, exercise.setup="prepare-flights"}
+by_tailnum <- group_by(flights, tailnum)
+delay <- summarise(by_tailnum,
+  count = n(),
+  dist = mean(distance, na.rm = TRUE),
+  delay = mean(arr_delay, na.rm = TRUE))
+delay <- filter(delay, count > 20, dist < 2000)
+
+delay
+```
+
+Finally, we can plot it.
+
+```{r prepare-plot, message=FALSE, warning=FALSE}
+flights <- nycflights13::flights
+by_tailnum <- group_by(flights, tailnum)
+delay <- summarise(by_tailnum,
+  count = n(),
+  dist = mean(distance, na.rm = TRUE),
+  delay = mean(arr_delay, na.rm = TRUE))
+delay <- filter(delay, count > 20, dist < 2000)
+```
+
+```{r plotting-activity-1, exercise=TRUE, message=FALSE, warning=FALSE, exercise.setup="prepare-plot"}
+ggplot(delay, aes(dist, delay)) +
+  geom_point(aes(size = count), alpha = 1/2) +
+  geom_smooth() + scale_size_area() +
+  labs(x="Mean distance (miles)", y="Mean delay (minutes)", size="Number of flights made") +
+  ggtitle("Individual aircraft mean flight delay by mean length of flights")
+```
+
+### Activity
+
+Do the same analysis but as a pipeline using `%>%`.
+The first step in the pipeline has been done for you.
+(Warnings about smoothing and missing values can be ignored.)
+
+```{r plotting-activity-2, exercise=TRUE, exercise.setup="prepare-flights"}
+#by_tailnum <- group_by(flights, tailnum)
+#delay <- summarise(by_tailnum,
+#  count = n(),
+#  dist = mean(distance, na.rm = TRUE),
+#  delay = mean(arr_delay, na.rm = TRUE))
+#delay <- filter(delay, count > 20, dist < 2000)
+
+delay <- flights %>%
+  group_by(tailnum)
+
+ggplot(delay, aes(dist, delay)) +
+  geom_point(aes(size = count), alpha = 1/2) +
+  geom_smooth() + scale_size_area() +
+  labs(x="Mean distance (miles)", y="Mean delay (minutes)", size="Number of flights made") +
+  ggtitle("Individual aircraft mean flight delay by mean length of flights")
+```
+
+```{r plotting-activity-2-solution}
+delay <- flights %>%
+  group_by(tailnum) %>%
+  summarise(count = n(),
+            dist = mean(distance, na.rm = TRUE),
+            delay = mean(arr_delay, na.rm = TRUE)) %>%
+  filter(count > 20, dist < 2000)
+
+ggplot(delay, aes(dist, delay)) +
+  geom_point(aes(size = count), alpha = 1/2) +
+  geom_smooth() + scale_size_area() +
+  labs(x="Mean distance (miles)", y="Mean delay (minutes)", size="Number of flights made") +
+  ggtitle("Individual aircraft mean flight delay by mean length of flights")
+```
+
+<div class="aside">
+### An aside...
+
+Notice that the call to `ggplot()` has the data as the first argument
+and that `%>%` allows us to chain functions taking the output of one function and passing it to the
+first argument of the next function.
+This means we can add `ggplot()` to the end of our pipeline.
+
+```{r plotting-activity-3, exercise=TRUE, exercise.setup="prepare-flights"}
+flights %>%
+  group_by(tailnum) %>%
+  summarise(count = n(),
+            dist = mean(distance, na.rm = TRUE),
+            delay = mean(arr_delay, na.rm = TRUE)) %>%
+  filter(count > 20, dist < 2000) %>%
+  ggplot(aes(dist, delay)) +
+    geom_point(aes(size = count), alpha = 1/2) +
+    geom_smooth() + scale_size_area() +
+    labs(x="Mean distance (miles)", y="Mean delay (minutes)", size="Number of flights made") +
+    ggtitle("Individual aircraft mean flight delay by mean length of flights")
+```
+
+There's actually quite a lot going on here and we'll look at this again when we cover _gpplot2_ in more detail.
+</div>
+
+## Grouped summaries
+
+We use `summarise()` with aggregate functions, which take a vector of values and return a single number.
+
+There are many useful examples of such functions in base $\textsf{R}$
+like `min()`, `max()`, `mean()`, `sum()`, `sd()`, `median()`, and `IQR()`
+and _dplyr_ provides a handful of others:
+
+  * `n()` gives the number of observations in the current group
+  * `n_distinct(x)` gives the number of unique values in x.
+  * `first(x)`, `last(x)` and `nth(x, n)`
+    * these work similarly to `x[1]`, `x[length(x)]`, and `x[n]` but give you more control over the result if the value is missing.
+
+For example, we could use these to find the number of planes and the number of flights that go to each possible destination:
+
+```{r grouping-activity-2, exercise=TRUE, exercise.setup="prepare-flights"}
+flights %>%
+  group_by(dest) %>%
+  summarise(planes = n_distinct(tailnum),
+            flights = n())
+```
+
+This is giving us:
+
+  * the number of different (distinct) tail numbers (planes) for each destination group
+  * the total number of rows for each destination group (the total number of flights to that destination)
+
+You can also use any function that you write yourself.
+
+<div class="aside">
+### An aside...
+
+For performance reasons, _dplyr_ provides optimised C++ versions of many of the functions discussed here.
+If you want to provide your own C++ function (using `Rcpp`), see the [hybrid-evaluation vignette](https://www.rdocumentation.org/packages/dplyr/versions/0.7.6/vignettes/internals/hybrid-evaluation.Rmd) for more details.
+</div>
+
+## Grouping by multiple variables
+
+When grouping by multiple variables, each summary peels off one level of the grouping. 
+
+That makes it easy to progressively roll-up a dataset:
+
+```{r multi-grouping-activity-1, exercise=TRUE, exercise.setup="prepare-flights"}
+per_day <- flights %>%
+  group_by(year, month, day) %>%
+  summarise(flights = n())
+
+per_day
+```
+
+```{r multi-grouping-activity-2-setup}
+per_day <- flights %>%
+  group_by(year, month, day) %>%
+  summarise(flights = n())
+```
+
+```{r multi-grouping-activity-2, exercise=TRUE, exercise.setup="multi-grouping-activity-2-setup"}
+per_month <- per_day %>% summarise(flights = sum(flights))
+
+per_month
+```
+
+```{r multi-grouping-activity-3-setup}
+per_day <- flights %>%
+  group_by(year, month, day) %>%
+  summarise(flights = n())
+per_month <- per_day %>% summarise(flights = sum(flights))
+```
+
+```{r multi-grouping-activity-3, exercise=TRUE, exercise.setup="multi-grouping-activity-3-setup"}
+per_year <- per_month %>% summarise(flights = sum(flights))
+
+per_year
+```
+
+However you need to be careful when progressively rolling up summaries like this: 
+
+  * it's ok for sums and counts
+  * you _need to think about weighting_ for means and variances 
+  * and it's **not possible** to do this exactly for medians
+
+## Other data sources
+
+As well as data frames, _dplyr_ works with data that is stored in other ways,
+like data tables, databases and multidimensional arrays.
+
+### data.table
+
+_dplyr_ also provides [_data.table_](https://cran.r-project.org/web/packages/data.table/index.html) methods
+for all verbs through [_dtplyr_](https://cran.r-project.org/web/packages/dtplyr/index.html).
+If you’re using data tables already this lets you to use `dplyr` syntax for data manipulation,
+and _data.table_ for everything else.
+
+For multiple operations, _data.table_ can be faster because you usually use it with multiple verbs simultaneously.
+For example, with _data.table_ one can do a mutate and a select in a single step.
+It's smart enough to know that there’s no point in computing the new variable for rows about to be thrown away.
+
+The advantages of using _dplyr_ with data tables are:
+
+  * for common data manipulation tasks, it insulates you from the _reference semantics_ of data.tables
+  * in simpler terms: it protects you from accidentally modifying your data.
+
+Instead of one complex method built around the subscripting operator (`[ ]`) using _dplyr_ provides many simple methods.
+
+## Databases
+
+Conveniently, _dplyr_ also allows the use of the _dplyr_ manipulation verbs with a remote database.
+When you do this, _dplyr_ takes care of generating the necessary SQL.
+This helps avoid the cognitive overheaad of constantly switching between different language syntaxes and paragigms.
+See the databases vignette for more details by running `vignette("databases", package = "dbplyr")`.
+
+Compared to DBI and the database connection algorithms:
+
+  * _dplyr_ hides, as much as possible, the fact that the underlying data is in a remote database
+  * a knowledge of SQL is not required (although it helps!)
+  * _dplyr_ abstracts over the many differences between the different DBI implementations
+
+## Two-table verbs
+
+It's rare that a data analysis involves only a single table of data.
+In practice, there are normally many tables that contribute to an analysis, and flexible tools are needed to combine them. 
+In _dplyr_, there are three families of verbs that work with two tables at a time:
+
+**mutating joins**
+  ~ which add new variables to one table from matching rows in another.
+
+**filtering joins**
+  ~ which filter observations from one table based on whether or not they match an observation in the other table.
+
+**set operations**
+  ~ which combine the observations in the data sets as if they were set elements.
+
+The following discussion assumes that you have [_tidy data_](https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html),
+where the rows are observations and the columns are variables. 
+If you’re not familiar with that framework, it is worth reading up on it.
+
+All two-table verbs work similarly: 
+
+  * the first two arguments are `x` and `y`, and provide the tables to combine
+  * the output is always a new table with the same type as `x`
+
+## Mutating joins
+
+Mutating joins allow you to combine variables from multiple tables. 
+
+For example, take the `nycflights13` data:
+
+  * in one table we have flight information with an abbreviation for carrier (`flights`)
+  * in another we have a mapping between abbreviations and full names (`airlines`)
+  * we can use a join to add the carrier names to the flight data
+
+```{r prepare-all-flights}
+airlines <- nycflights13::airlines
+airports <- nycflights13::airports
+flights <- nycflights13::flights
+planes <- nycflights13::planes
+weather <- nycflights13::weather
+trimmed_flights <- flights %>% select(year:day, hour, origin, dest, tailnum, carrier)
+```
+
+```{r mutating-joins-activity-1, exercise=TRUE, exercise.setup="prepare-all-flights"}
+# Drop unimportant variables so it's easier to understand the join results.
+trimmed_flights <- flights %>% select(year:day, hour, origin, dest, tailnum, carrier)
+
+trimmed_flights %>% 
+  left_join(airlines)
+```
+
+### Controlling how tables are matched
+
+As well as `x` and `y`,
+each mutating join takes an argument by that controls which variables are used to match observations in the two tables.
+There are a few ways to specify it, as illustrated in the following examples with various tables from `nycflights13`.
+    
+### Matching tables by default (natural joins)
+
+`dplyr` will will use all variables that appear in both tables, a _natural join_.
+
+For example, the `flights` and `weather` tables match on their common variables: `year`, `month`, `day`, `hour` and `origin`.
+
+```{r mutating-joins-activity-2, exercise=TRUE, exercise.setup="prepare-all-flights"}
+trimmed_flights %>%
+  left_join(weather)
+```
+
+### Matching tables by specifying variable names
+
+We can specify particular column names to use using the `by=` argument which takes a character vector `by = c("column_a", "column_b")` 
+This is like a natural join, but uses only some of the common variables. 
+Tor example, `flights` and `planes` both have `year` columns,
+but they mean different things so we only want to join by `tailnum`.
+
+```{r mutating-joins-activity-3, exercise=TRUE, exercise.setup="prepare-all-flights"}
+trimmed_flights %>%
+  left_join(planes, by = "tailnum")
+```
+
+Note that the `year` columns in the output are disambiguated with a suffix `.x` or `.y`.
+Because the columns were not used in the match they need to be disambiguated in the result.
+The `.x` columns in this case come from `flights` and the `.y` columns from `planes`.
+We can change these suffixes to something less cryptic using the `suffix=` argument which takes a character vector of length 2.
+Note that the `.` needs to be included in the suffix.
+
+```{r mutating-joins-activity-4, exercise=TRUE, exercise.setup="prepare-all-flights"}
+trimmed_flights %>%
+  left_join(planes, by = "tailnum", suffix = c(".flights", ".planes"))
+```
+
+### Matching tables by specifying different variable names for each table
+
+If we're joining on columns from each table have different names
+we can pass a named character vector as the `by=` argument, _e.g._ `by = c("left" = "right")`.
+This will match variable `left` in table `x` to variable `right` in table `y`.
+The variables from `x` will be used in the output.
+
+For example, in the _nycflights13_ data the airport code is called `faa` in the `airports` data
+but `origin` and `dest` in the `flights` data because
+each flight has both an origin and a destination airport
+If we wanted to associate a full name with the origin airport we need to use a join which takes this into account.
+
+```{r mutating-joins-activity-5, exercise=TRUE, exercise.setup="prepare-all-flights"}
+trimmed_flights %>%
+  left_join(airports, by = c("origin" = "faa"))
+```
+
+### Different types of joins
+
+There are four types of mutating join, which differ in their behaviour when a match is not found. 
+Let's look at each in turn using the following simple data frames.
+
+```{r join-setup, echo=TRUE}
+(x <- data_frame(id = c(1, 2, 3, 4), n = c(85, 22, 67, 44)))
+(y <- data_frame(id = c(1, 3, 5), a = 10, b = "a"))
+```
+
+#### Inner joins
+
+`inner_join(x, y)` only includes observations that match in both `x` and `y`.
+
+```{r inner-join, exercise=TRUE, exercise.setup="join-setup"}
+x %>% inner_join(y)
+```
+
+#### Left joins
+
+`left_join(x, y)` includes all observations in `x`, regardless of whether they match a corresponding record in `y`. 
+This is the most commonly used join because it ensures that you don’t lose observations from your primary table.
+Missing values in `y` are filled with `NA`.
+The _left_ table is included in full and supplemented with matching rows from the right table.
+
+```{r left-join, exercise=TRUE, exercise.setup="join-setup"}
+x %>% left_join(y)
+```
+
+#### Right joins
+
+`right_join(x, y)` includes all observations in `y`, regardless of whether there is a corresponding record in `x`.
+It's equivalent to `left_join()` with the arguments reversed, _i.e._ `left_join(y, x)`, but the columns will be ordered differently.
+Missing values in `x` are filled with `NA`.
+The _right_ table is included in full and supplemented with matching rows from the left table.
+
+```{r right-join, exercise=TRUE, exercise.setup="join-setup"}
+x %>% right_join(y)
+y %>% left_join(x)
+```
+
+#### Full joins 
+
+`full_join()` includes all observations from x and y.
+
+```{r full-join, exercise=TRUE, exercise.setup="join-setup"}
+x %>% full_join(y)
+```
+
+The left, right and full joins are collectively know as _outer joins_.
+When a row doesn't match in an outer join, the new variables are filled in with `NA`.
+Here's a summary.
+
+| Join  | Description                                                 |
+|:------|:------------------------------------------------------------|
+| inner | Only rows matching in both  X and Y.                        |
+| left  | Every row from X with corresponding matches from Y or `NA`. |
+| right | Every row from Y with corresponding matches from X or `NA`. |
+| full  | Every row from X and Y with corresponding matches plus the rows that don't match with gaps filled in by `NA`. |
+
+#### New rows (observations) can be created 
+
+While mutating joins are primarily used to add new variables (columns), they can also generate new observations (rows). 
+
+If a match is not unique, a join will add all possible combinations (the _Cartesian product_) of the matching observations:
+
+```
+x <- data_frame(id = c(1, 2, 3), n = c(11, 22, 33))
+y <- data_frame(id = c(1, 1, 2), z = c("a", "b", "a")))
+```
+
+```{r cartesian-setup}
+x <- data_frame(id = c(1, 2, 3), n = c(11, 22, 33))
+y <- data_frame(id = c(1, 1, 2), z = c("a", "b", "a"))
+```
+
+```{r cartesian-product, exercise=TRUE, exercise.setup="cartesian-setup"}
+x %>% left_join(y)
+```
+
+Because `id == 1` does not uniquely identify a record in `y` we get all possible matches.
+The matches from `x` are $\{(1, 11)\}$ and the matches from `y` are $\{(1, \textrm{"a"}), (1, \textrm{"b"})\}$ so we get the product of these two sets as the match for `id == 1`
+
+$$ \{(1, 11)\} \times \{(1, \textrm{"a"}), (1, \textrm{"b"})\} = \{(1, 11, \textrm{"a"}), (1, 11, \textrm{"b"})\}$$
+
+If there are multiple matches on both sides, _i.e._ the match criteria are not unique for either table we get even more rows generated.
+If we have $m$ matches in `x` for a row and $n$ matches in `y` for a row then the number of rows generated is $m \times n$.
+
+So, changing the above example slightly so the `id == 1` matches multiple rows in both tables:
+
+```
+x <- data_frame(id = c(1, 1, 3), n = c(11, 22, 33))
+y <- data_frame(id = c(1, 1, 2), z = c("a", "b", "a"))
+```
+
+```{r cartesian-2-setup}
+x <- data_frame(id = c(1, 1, 3), n = c(11, 22, 33))
+y <- data_frame(id = c(1, 1, 2), z = c("a", "b", "a"))
+```
+
+We get
+
+$\{(1, 11), (1, 22)\}$ from `x` and $\{(1, \textrm{"a"}), (1, \textrm{"b"})\}$ again from `y`
+so we get the product of these two sets as the match for `id == 1`
+
+$$ \{(1, 11), (1, 22)\} \times \{(1, \textrm{"a"}), (1, \textrm{"b"})\} = \{(1, 11, \textrm{"a"}), (1, 22, \textrm{"a"}), (1, 11, \textrm{"b"}), (1, 22, \textrm{"b"})\}$$
+
+```{r cartesian-product-2, exercise=TRUE, exercise.setup="cartesian-2-setup"}
+x %>% left_join(y)
+```
+
+It follows that if there are _no_ columns in common between the two data sets we get
+_every_ column in `x` matched with _every_ column in `y`.
+In other words we get a result with $nrow(x) \times nrow(y)$ rows!
+
+## Filtering joins
+
+_Filtering joins_ match obserations in the same way as mutating joins, but affect the observations, not the variables. 
+
+There are two types of filtering join:
+
+  * `semi_join(x, y)` keeps all observations in `x` that have a match in `y`
+  * `anti_join(x, y)` drops all observations in `x` that have a match in `y`
+
+These are most useful for diagnosing join mismatches.
+For example, there are many flights in the `nycflights13` dataset that don't have a matching tail number in the planes table
+
+```{r exercise=FALSE, echo=TRUE, exercise.setup="prepare-all-flights"}
+flights %>% 
+  anti_join(planes, by = "tailnum") %>% 
+  count(tailnum, sort = TRUE)
+```
+
+If you're worried about what observations your joins will or won't match and want to check
+start with looking at the results of `semi_join()` or `anti_join()`. 
+
+The functions `semi_join()` and `anti_join()` never duplicate, they only ever remove observations.
+
+```
+x <- data_frame(id = c(1, 1, 3, 4), n = 1:4)
+y <- data_frame(id = c(1, 1, 2), z = c("a", "b", "a"))
+```
+
+```{r semijoin-setup}
+x <- data_frame(id = c(1, 1, 3, 4), n = 1:4)
+y <- data_frame(id = c(1, 1, 2), z = c("a", "b", "a"))
+```
+
+```{r semijoin-example-1, exercise=TRUE, exercise.setup="semijoin-setup"}
+# four rows to start with
+x
+# and we get four rows after the join
+x %>% inner_join(y, by = "id")
+```
+
+But only two rows actually match in our source table
+
+```{r semijoin-example-2, exercise=TRUE, exercise.setup="semijoin-setup"}
+# But only two rows actually match
+x %>% semi_join(y, by = "id")
+```
+
+## Set operations
+
+The final type of two-table verb is _set operations_.
+These expect the `x` and `y` inputs to have the same variables, and treat the observations like sets.
+
+  * `intersect(x, y)` returns only observations in both `x` and y`
+  * `union(x, y)` returns unique observations in `x` and `y`
+  * `setdiff(x, y)` return observations in `x`, but not in `y`
+
+Given this simple data:
+
+```
+x <- data_frame(id = 1:2, n = c(1L, 1L))
+y <- data_frame(id = 1:2, n = 1:2)
+```
+
+```{r set-setup}
+x <- data_frame(id = 1:2, n = c(1L, 1L))
+y <- data_frame(id = 1:2, n = 1:2)
+```
+
+Check you understand the output of the follow examples:
+
+```{r set-intersection, exercise=TRUE, exercise.setup="set-setup"}
+intersect(x, y)
+```
+
+```{r set-union, exercise=TRUE, exercise.setup="set-setup"}
+union(x, y)
+```
+
+```{r set-setdiff, exercise=TRUE, exercise.setup="set-setup"}
+setdiff(x, y)
+setdiff(y, x)
+```
+
+If the inputs do not have the same columns we get an error telling us the inputs are not compatible.
+
+```{r set-error, exercise=TRUE}
+x <- data_frame(id = 1:2, n = c(1L, 1L))
+y <- data_frame(id = 1:2, m = 1:2)
+union(x, y)
+```
+
+## Working with databases
+
+<div class="under-the-bonnet">
+### Under the bonnet...
+
+This whole section can be considered 'under the bonnet' technical stuff.
+If you're not into SQL right now you can safely skip this and come back to it later when you need it.
+</div>
+
+Each two-table verb has a straightforward equivalent in SQL.
+
+| dplyr             |	SQL                                                                |
+|:------------------|:-------------------------------------------------------------------|
+| `inner_join()`    | SELECT * FROM x JOIN y ON x.a = y.a                                |
+| `left_join()`	    | SELECT * FROM x LEFT JOIN y ON x.a = y.a                           |
+| `right_join()`    | SELECT * FROM x RIGHT JOIN y ON x.a = y.a                          |
+| `full_join()`	    | SELECT * FROM x FULL JOIN y ON x.a = y.a                           |
+| `semi_join()`	    | SELECT * FROM x WHERE EXISTS (SELECT 1 FROM y WHERE x.a = y.a)     |
+| `anti_join()`     | SELECT * FROM x WHERE NOT EXISTS (SELECT 1 FROM y WHERE x.a = y.a) |
+| `intersect(x, y)`	| SELECT * FROM x INTERSECT SELECT * FROM y                          |
+| `union(x, y)`	    | SELECT * FROM x UNION SELECT * FROM y                              |
+| `setdiff(x, y)`	  | SELECT * FROM x EXCEPT SELECT * FROM y                             |
+
+Note that `x` and `y` don't have to be tables in the same database.
+
+If you specify `copy=TRUE`, _dplyr_ will copy the `y` table into the same location as the `x` variable.
+This is useful if you've downloaded a summarised dataset and determined a subset of interest that you now want the full data for.
+
+You can use `semi_join(x, y, copy = TRUE)` to upload the indices of interest to a temporary table in the same database as x,
+and then perform a efficient semi join in the database.
+
+If you’re working with large data,
+it maybe also be helpful to set `auto_index = TRUE`.
+That will automatically add an index on the join variables to the temporary table.
+
+## Coercion rules
+
+When joining tables, _dplyr_ is a little more conservative than base $\textsf{R}$ about the types of variable that it considers equivalent. 
+This can lead to unexpected results if you're working with factors.
+
+Factors with different levels are coerced to character with a warning:
+
+```{r factor-coercion-1, exercise=TRUE}
+x <- data_frame(id = 1, f = factor("a"))
+y <- data_frame(id = 2, f = factor("b"))
+full_join(x, y) %>% str()
+```
+
+Factors with the same levels in a different order are coerced to character with a warning:
+
+```{r factor-coercion-2, exercise=TRUE}
+x <- data_frame(id = 1, f = factor("a", levels = c("a", "b")))
+y <- data_frame(id = 2, f = factor("b", levels = c("b", "a")))
+full_join(x, y) %>% str()
+```
+
+Factors are preserved only if the levels match exactly:
+
+```{r factor-coercion-3, exercise=TRUE}
+x <- data_frame(id = 1, f = factor("a", levels = c("a", "b")))
+y <- data_frame(id = 2, f = factor("b", levels = c("a", "b")))
+full_join(x, y) %>% str()
+```
+
+A factor and a character are coerced to character with a warning:
+
+```{r factor-coercion-4, exercise=TRUE}
+x <- data_frame(x = 1, y = "a")
+y <- data_frame(x = 2, y = factor("a"))
+full_join(x, y) %>% str()
+```
+
+Logicals will be silently upcast to integer, and integer to numeric, but coercing to character will raise an error:
+
+```{r factor-coercion-5, exercise=TRUE}
+x <- data_frame(x = 1, y = 1L)
+y <- data_frame(x = 2, y = 1.5)
+full_join(x, y) %>% str()
+```
+
+```{r factor-coercion-5a, exercise=TRUE}
+x <- data_frame(x = 1, y = 1L)
+y <- data_frame(x = 2, y = "a")
+full_join(x, y) %>% str()
+```
+
+## Multiple-table verbs
+
+_dplyr_ does not provide any functions for working with three or more tables. 
+
+Instead use [`Reduce()`](http://adv-r.had.co.nz/Functionals.html#functionals-fp),
+as described in [_Advanced R_](http://adv-r.had.co.nz),
+to iteratively combine the two-table verbs to handle as many tables as you need.
+
+## Summary
+
+This concludes our overview of _dplyr_.
+
+More information is available online at the [_dplyr_ webiste](https://dplyr.tidyverse.org).

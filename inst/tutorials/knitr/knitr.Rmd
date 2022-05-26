@@ -2,13 +2,13 @@
 title: "Generating dynamic reports with knitr"
 tutorial:
   id: "au.edu.unsw.hdat.knitr"
-  version: 1.2.2
+  version: 1.2.3
 output:
   learnr::tutorial:
     progressive: true
     css: css/tutorials.css
 runtime: shiny_prerendered
-description: An introduction to the knitr package in R
+description: "UNSW Health Data Science: An introduction to the knitr package in R"
 ---
 
 ```{r setup, include=FALSE}

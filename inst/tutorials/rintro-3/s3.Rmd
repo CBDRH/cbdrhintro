@@ -2,14 +2,14 @@
 title: "Introduction to R: section 3"
 tutorial:
   id: "au.edu.unsw.cbdrh.intro_to_R.section3"
-  version: 0.1
+  version: 0.4
 output: 
   learnr::tutorial:
     progressive: false
     allow_skip: true
     css: css/intro.css
 runtime: shiny_prerendered
-description: "Section 3: Matrices and lists"
+description: "UNSW Health Data Science: Section 3: Matrices and lists"
 ---
 
 ```{r setup, include=FALSE}
