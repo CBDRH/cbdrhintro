@@ -2,13 +2,13 @@
 title: "Resolving conflicts in git"
 tutorial:
   id: "au.edu.unsw.cbdrh.git_conflicts"
-  version: 1.0.3
+  version: 1.0.4
 output:
   learnr::tutorial:
     progressive: true
     css: css/stylesheet.css
 runtime: shiny_prerendered
-description: "REsolving conflicts in git"
+description: "UNSW Health Data Science: Resolving conflicts in git"
 ---
 
 ```{r setup, include=FALSE}

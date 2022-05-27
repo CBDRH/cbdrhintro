@@ -2,12 +2,13 @@
 title: "Introduction to git"
 tutorial:
   id: "au.edu.unsw.cbdrh.intro_to_git"
-  version: 0.1.1
+  version: 0.1.2
 output:
   learnr::tutorial:
     progressive: true
     css: css/intro.css
 runtime: shiny_prerendered
+description: "UNSW Health Data Science: Introduction to git"
 ---
 
 ```{r setup, include=FALSE}
