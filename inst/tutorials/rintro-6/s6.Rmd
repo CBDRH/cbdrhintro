@@ -106,7 +106,7 @@ and executes as follows:
     * the body may be zero, one or more lines of code including other conditions and calls to functions
     * the first part of the `if`, the clause here shown as `# do this if condition is true` is not executed
 
-```{r conditionals-example-2, exercise=TRUE, exercise.setup="conditionals-examples-set-up"}
+```{r conditionals-example-2, exercise=TRUE}
 x <- 5
 
 if (x <= 0) {
@@ -150,7 +150,7 @@ and executes as follows:
     * the block may be zero, one or more lines of code including other conditions and calls to functions
     * none of the other bodies are executed
     
-```{r conditionals-example-3, exercise=TRUE, exercise.setup="conditionals-examples-set-up"}
+```{r conditionals-example-3, exercise=TRUE}
 x <- 5
 
 if (x > 0) {
